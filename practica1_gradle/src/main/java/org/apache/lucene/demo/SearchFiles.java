@@ -18,6 +18,7 @@ package org.apache.lucene.demo;
  */
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -50,6 +51,7 @@ public class SearchFiles {
 
     String index = "index";
     String field = "contents";
+    String output = null;
     String queries = null;
     int repeat = 0;
     boolean raw = false;
@@ -69,6 +71,9 @@ public class SearchFiles {
       } else if ("-query".equals(args[i])) {
         queryString = args[i+1];
         i++;
+      } else if ("-output".equals(args[i])) {
+        output = args[i+1];
+        i++;
       } else if ("-repeat".equals(args[i])) {
         repeat = Integer.parseInt(args[i+1]);
         i++;
@@ -86,15 +91,24 @@ public class SearchFiles {
     
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
     IndexSearcher searcher = new IndexSearcher(reader);
-    Analyzer analyzer = new SpanishAnalyzer();
+    Analyzer analyzer = new SpanishAnalyzer2();
 
     BufferedReader in = null;
     if (queries != null) {
-      in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), "UTF-8"));
+      in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), StandardCharsets.UTF_8));
     } else {
-      in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+      in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
     }
+
+    BufferedWriter out = null;
+    if (output != null) {
+      out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8));
+    } else {
+      out = new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
+    }
+
     QueryParser parser = new QueryParser(field, analyzer);
+    int numQuery = 1;
     while (true) {
       if (queries == null && queryString == null) {                        // prompt the user
         System.out.println("Enter query: ");
@@ -123,12 +137,15 @@ public class SearchFiles {
         System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
       }
 
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+      doPagingSearch(in, out, searcher, query, numQuery, hitsPerPage, raw, output == null);
 
       if (queryString != null) {
         break;
       }
+      numQuery++;
     }
+    in.close();
+    out.close();
     reader.close();
   }
 
@@ -142,22 +159,27 @@ public class SearchFiles {
    * is executed another time and all hits are collected.
    * 
    */
-  public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
-                                     int hitsPerPage, boolean raw, boolean interactive) throws IOException {
+  public static void doPagingSearch(BufferedReader in, BufferedWriter out,IndexSearcher searcher, Query query,
+                                     int numQuery, int hitsPerPage, boolean raw, boolean interactive) throws IOException {
  
     // Collect enough docs to show 5 pages
     TopDocs results = searcher.search(query, 5 * hitsPerPage);
     ScoreDoc[] hits = results.scoreDocs;
     
     int numTotalHits = Math.toIntExact(results.totalHits.value);
-    System.out.println(numTotalHits + " total matching documents");
+    System.out.println(numTotalHits + " total matching documents" + "\n");
 
     int start = 0;
-    int end = Math.min(numTotalHits, hitsPerPage);
-        
+    int end;
+    if (interactive){
+      end = Math.min(numTotalHits, hitsPerPage);
+    } else {
+      end = numTotalHits;
+    }
+
     while (true) {
       if (end > hits.length) {
-        System.out.println("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected.");
+        out.write("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected." + "\n");
         System.out.println("Collect more (y/n) ?");
         String line = in.readLine();
         if (line.length() == 0 || line.charAt(0) == 'n') {
@@ -166,8 +188,10 @@ public class SearchFiles {
 
         hits = searcher.search(query, numTotalHits).scoreDocs;
       }
-      
-      end = Math.min(hits.length, start + hitsPerPage);
+
+      if(interactive){
+        end = Math.min(hits.length, start + hitsPerPage);
+      }
       
       for (int i = start; i < end; i++) {
 
@@ -178,16 +202,15 @@ public class SearchFiles {
         long modifiedLong = Long.parseLong(modified);
 
         if (path != null) {
-          System.out.println((i+1) + ". " + path);
-        } else {
-          System.out.println((i+1) + ". " + "No path for this document");
+          String[] a = path.split("\\\\");
+          out.write(numQuery + "\t" + a[a.length-1] + "\n");
         }
         // NUEVO -> 2.2
         if (raw) {
           Date d = new Date(modifiedLong);
           Calendar c = new GregorianCalendar();
           c.setTime(d);
-          System.out.println("\tmodified: "+
+          out.write("\tmodified: "+
                   c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.ENGLISH) + " " +
                   c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.ENGLISH) +  " " +
                   c.get(Calendar.DAY_OF_MONTH) +  " " +
@@ -195,7 +218,7 @@ public class SearchFiles {
                   c.get(Calendar.MINUTE) +  ":" +
                   c.get(Calendar.SECOND) +  " " +
                   c.getTimeZone().getDisplayName(true, TimeZone.SHORT) +  " " +
-                  c.get(Calendar.YEAR));
+                  c.get(Calendar.YEAR) + "\n");
           continue;
         }
       }

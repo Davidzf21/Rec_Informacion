@@ -83,7 +83,7 @@ public class IndexFiles {
       System.out.println("Indexing to directory '" + indexPath + "'...");
 
       Directory dir = FSDirectory.open(Paths.get(indexPath));
-      Analyzer analyzer = new SpanishAnalyzer();
+      Analyzer analyzer = new SpanishAnalyzer2();
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
       if (create) {
@@ -193,14 +193,13 @@ public class IndexFiles {
 
           String[] tipos = new String[]{
                   "dc:title",
-                  "dc:identifier",
-                  "dc:subject",
-                  "dc:type",
-                  "dc:description",
                   "dc:creator",
+                  "dc:subject",
+                  "dc:description",
                   "dc:publisher",
-                  "dc:format",
-                  "dc:language",
+                  "dc:contributor",
+                  "dc:date",
+                  "dc:type",
           };
 
           for(String tipo : tipos)
