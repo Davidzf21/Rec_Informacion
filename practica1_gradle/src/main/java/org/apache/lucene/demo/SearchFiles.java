@@ -110,9 +110,6 @@ public class SearchFiles {
     QueryParser parser = new QueryParser(field, analyzer);
     int numQuery = 1;
     while (true) {
-      if (queries == null && queryString == null) {                        // prompt the user
-        System.out.println("Enter query: ");
-      }
 
       String line = queryString != null ? queryString : in.readLine();
 
@@ -127,21 +124,12 @@ public class SearchFiles {
       
       Query query = parser.parse(line);
       System.out.println("Searching for: " + query.toString(field));
-            
-      if (repeat > 0) {                           // repeat & time as benchmark
-        Date start = new Date();
-        for (int i = 0; i < repeat; i++) {
-          searcher.search(query, 100);
-        }
-        Date end = new Date();
-        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
-      }
 
       doPagingSearch(in, out, searcher, query, numQuery, hitsPerPage, raw, output == null);
 
-      if (queryString != null) {
+      /*if (queryString != null) {
         break;
-      }
+      }*/
       numQuery++;
     }
     in.close();
@@ -162,51 +150,28 @@ public class SearchFiles {
   public static void doPagingSearch(BufferedReader in, BufferedWriter out,IndexSearcher searcher, Query query,
                                      int numQuery, int hitsPerPage, boolean raw, boolean interactive) throws IOException {
  
+    System.out.println(query.toString());
     // Collect enough docs to show 5 pages
-    TopDocs results = searcher.search(query, 5 * hitsPerPage);
+    TopDocs results = searcher.search(query, 100);
     ScoreDoc[] hits = results.scoreDocs;
     
     int numTotalHits = Math.toIntExact(results.totalHits.value);
     System.out.println(numTotalHits + " total matching documents" + "\n");
 
-    int start = 0;
-    int end;
-    if (interactive){
-      end = Math.min(numTotalHits, hitsPerPage);
-    } else {
-      end = numTotalHits;
-    }
-
-    while (true) {
-      if (end > hits.length) {
-        out.write("Only results 1 - " + hits.length +" of " + numTotalHits + " total matching documents collected." + "\n");
-        System.out.println("Collect more (y/n) ?");
-        String line = in.readLine();
-        if (line.length() == 0 || line.charAt(0) == 'n') {
-          break;
-        }
-
-        hits = searcher.search(query, numTotalHits).scoreDocs;
-      }
-
-      if(interactive){
-        end = Math.min(hits.length, start + hitsPerPage);
-      }
+    hits = searcher.search(query, numTotalHits).scoreDocs;
       
-      for (int i = start; i < end; i++) {
+    for (int i = 0; i < hits.length; i++) {
 
-        Document doc = searcher.doc(hits[i].doc);
-        String path = doc.get("path");
-        // NUEVO -> 2.2
-        String modified = doc.get("modified");
-        long modifiedLong = Long.parseLong(modified);
+      Document doc = searcher.doc(hits[i].doc);
+      String path = doc.get("path");
+      // NUEVO -> 2.2
 
-        if (path != null) {
-          String[] a = path.split("\\\\");
-          out.write(numQuery + "\t" + a[a.length-1] + "\n");
-        }
+      if (path != null) {
+        String[] a = path.split("\\\\");
+        out.write(numQuery + "\t" + a[a.length-1] + "\n");
+      }
         // NUEVO -> 2.2
-        if (raw) {
+        /*if (raw) {
           Date d = new Date(modifiedLong);
           Calendar c = new GregorianCalendar();
           c.setTime(d);
@@ -220,51 +185,8 @@ public class SearchFiles {
                   c.getTimeZone().getDisplayName(true, TimeZone.SHORT) +  " " +
                   c.get(Calendar.YEAR) + "\n");
           continue;
-        }
+        }*/
       }
 
-      if (!interactive || end == 0) {
-        break;
-      }
-
-      if (numTotalHits >= end) {
-        boolean quit = false;
-        while (true) {
-          System.out.print("Press ");
-          if (start - hitsPerPage >= 0) {
-            System.out.print("(p)revious page, ");  
-          }
-          if (start + hitsPerPage < numTotalHits) {
-            System.out.print("(n)ext page, ");
-          }
-          System.out.println("(q)uit or enter number to jump to a page.");
-          
-          String line = in.readLine();
-          if (line.length() == 0 || line.charAt(0)=='q') {
-            quit = true;
-            break;
-          }
-          if (line.charAt(0) == 'p') {
-            start = Math.max(0, start - hitsPerPage);
-            break;
-          } else if (line.charAt(0) == 'n') {
-            if (start + hitsPerPage < numTotalHits) {
-              start+=hitsPerPage;
-            }
-            break;
-          } else {
-            int page = Integer.parseInt(line);
-            if ((page - 1) * hitsPerPage < numTotalHits) {
-              start = (page - 1) * hitsPerPage;
-              break;
-            } else {
-              System.out.println("No such page");
-            }
-          }
-        }
-        if (quit) break;
-        end = Math.min(numTotalHits, start + hitsPerPage);
-      }
     }
   }
-}

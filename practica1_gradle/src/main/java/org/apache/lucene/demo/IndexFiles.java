@@ -43,7 +43,7 @@ import java.util.Date;
  * Run it with no command-line arguments for usage information.
  */
 public class IndexFiles {
-  
+
   private IndexFiles() {}
 
   /** Index all text files under a directory. */
@@ -101,6 +101,7 @@ public class IndexFiles {
       // size to the JVM (eg add -Xmx512m or -Xmx1g):
       //
       // iwc.setRAMBufferSizeMB(256.0);
+
 
       IndexWriter writer = new IndexWriter(dir, iwc);
       indexDocs(writer, docDir);
