@@ -1,3 +1,5 @@
 creator:Jorge +subject:Economia
 +creator:Guillermo +subject:Economia
+title:Informatica -type:TESIS
 date:2006
+title:"Complex Systems: Nonlinearity and Structural Complexity in spatially extended and discrete systems"
