@@ -54,7 +54,6 @@ public class SearchFiles {
     String output = null;
     String queries = null;
     int repeat = 0;
-    boolean raw = false;
     String queryString = null;
     int hitsPerPage = 10;
     
@@ -62,23 +61,27 @@ public class SearchFiles {
       if ("-index".equals(args[i])) {
         index = args[i+1];
         i++;
+
       } else if ("-field".equals(args[i])) {
         field = args[i+1];
         i++;
+
       } else if ("-queries".equals(args[i])) {
         queries = args[i+1];
         i++;
+
       } else if ("-query".equals(args[i])) {
         queryString = args[i+1];
         i++;
+
       } else if ("-output".equals(args[i])) {
         output = args[i+1];
         i++;
+
       } else if ("-repeat".equals(args[i])) {
         repeat = Integer.parseInt(args[i+1]);
         i++;
-      } else if ("-raw".equals(args[i])) {
-        raw = true;
+
       } else if ("-paging".equals(args[i])) {
         hitsPerPage = Integer.parseInt(args[i+1]);
         if (hitsPerPage <= 0) {
@@ -110,7 +113,6 @@ public class SearchFiles {
     QueryParser parser = new QueryParser(field, analyzer);
     int numQuery = 1;
     while (true) {
-
       String line = queryString != null ? queryString : in.readLine();
 
       if (line == null || line.length() == -1) {
@@ -125,30 +127,17 @@ public class SearchFiles {
       Query query = parser.parse(line);
       System.out.println("Searching for: " + query.toString(field));
 
-      doPagingSearch(in, out, searcher, query, numQuery, hitsPerPage, raw, output == null);
-
-      /*if (queryString != null) {
-        break;
-      }*/
+      doPagingSearch(in, out, searcher, query, numQuery, hitsPerPage);
       numQuery++;
     }
+
     in.close();
     out.close();
     reader.close();
   }
 
-  /**
-   * This demonstrates a typical paging search scenario, where the search engine presents 
-   * pages of size n to the user. The user can then go to the next page if interested in
-   * the next hits.
-   * 
-   * When the query is executed for the first time, then only enough results are collected
-   * to fill 5 result pages. If the user wants to page beyond this limit, then the query
-   * is executed another time and all hits are collected.
-   * 
-   */
   public static void doPagingSearch(BufferedReader in, BufferedWriter out,IndexSearcher searcher, Query query,
-                                     int numQuery, int hitsPerPage, boolean raw, boolean interactive) throws IOException {
+                                     int numQuery, int hitsPerPage) throws IOException {
  
     System.out.println(query.toString());
     // Collect enough docs to show 5 pages
@@ -164,29 +153,11 @@ public class SearchFiles {
 
       Document doc = searcher.doc(hits[i].doc);
       String path = doc.get("path");
-      // NUEVO -> 2.2
 
       if (path != null) {
         String[] a = path.split("\\\\");
         out.write(numQuery + "\t" + a[a.length-1] + "\n");
       }
-        // NUEVO -> 2.2
-        /*if (raw) {
-          Date d = new Date(modifiedLong);
-          Calendar c = new GregorianCalendar();
-          c.setTime(d);
-          out.write("\tmodified: "+
-                  c.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.ENGLISH) + " " +
-                  c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.ENGLISH) +  " " +
-                  c.get(Calendar.DAY_OF_MONTH) +  " " +
-                  c.get(Calendar.HOUR) +  ":" +
-                  c.get(Calendar.MINUTE) +  ":" +
-                  c.get(Calendar.SECOND) +  " " +
-                  c.getTimeZone().getDisplayName(true, TimeZone.SHORT) +  " " +
-                  c.get(Calendar.YEAR) + "\n");
-          continue;
-        }*/
-      }
-
     }
   }
+}

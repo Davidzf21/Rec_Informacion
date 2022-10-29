@@ -164,76 +164,91 @@ public class IndexFiles {
         }
 
         try {
-
           // make a new, empty document
           Document doc = new Document();
 
-          // Add the path of the file as a field named "path".  Use a
-          // field that is indexed (i.e. searchable), but don't tokenize 
-          // the field into separate words and don't index term frequency
-          // or positional information:
+          // Ruta del fichero
           Field pathField = new StringField("path", file.getPath(), Field.Store.YES);
           doc.add(pathField);
 
-          // Add the last modified date of the file a field named "modified".
-          // Use a StoredField to return later its value as a response to a query.
-          // This indexes to milli-second resolution, which
-          // is often too fine.  You could instead create a number based on
-          // year/month/day/hour/minutes/seconds, down the resolution you require.
-          // For example the long value 2011021714 would mean
-          // February 17, 2011, 2-3 PM.
+          System.out.println(file.getPath());
+
+          // Ultima modificación
           doc.add(new StoredField("modified", file.lastModified()));
 
-          // Add the contents of the file to a field named "contents".  Specify a Reader,
-          // so that the text of the file is tokenized and indexed, but not stored.
-          // Note that FileReader expects the file to be in UTF-8 encoding.
-          // If that's not the case searching for special characters will fail.
-          // NUEVO -> 2.3
           DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-          org.w3c.dom.Document doc2 = docBuilder.parse(file)
+          org.w3c.dom.Document doc2 = docBuilder.parse(file);
 
+          String[] tipos = new String[]{
+                  "dc:title",
+                  "dc:creator",
+                  "dc:subject",
+                  "dc:description",
+                  "dc:publisher",
+                  "dc:contributor",
+                  "dc:date",
+                  "dc:type",
+          };
+
+          // Tipos
+          for(String tipo : tipos) {
+            org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName(tipo);
+            for (int i =0; i<listaNodos.getLength(); i++){
+              Node nodo = listaNodos.item(i);
+              String content = nodo.getTextContent();
+              doc.add(new TextField(tipo.substring(3), new StringReader(content)));
+            }
+          }
+
+          // Obtención del campo ows:LowerCorner
           org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName("ows:LowerCorner");
           if(listaNodos.getLength() == 1) {
             Node nodo = listaNodos.item(0);
             String content = nodo.getTextContent();
 
-            string[] split = content.Split();
-            string west = split[0];
-            string north = split[1];
+            String[] split = content.split(" ");
+            String west = split[0];
+            String south = split[1];
 
-            DoublePoint southField = new DoublePoint ("south", Double.ParseDouble(north));
-            DoublePoint westField = new DoublePoint ("west", Double.ParseDouble(west));
+            System.out.println("Oeste: " + west + "\tSur: " + south);
+
+            DoublePoint southField = new DoublePoint ("south", Double.parseDouble(south));
+            DoublePoint westField = new DoublePoint ("west", Double.parseDouble(west));
+
+            // Localizaciones sur y oeste
             doc.add(southField);
             doc.add(westField);
           }
 
-          org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName("ows:UpperCorner);
-          if(listaNodos.getLength() == 1) {
-            Node nodo = listaNodos.item(0);
+          // Obtención del campo ows:UpperCorner
+          org.w3c.dom.NodeList listaNodos2 = doc2.getElementsByTagName("ows:UpperCorner");
+          if(listaNodos2.getLength() == 1) {
+            Node nodo = listaNodos2.item(0);
             String content = nodo.getTextContent();
 
-            string[] split = content.Split();
-            string east = split[0];
-            string north = split[1];
-            DoublePoint southField = new DoublePoint ("north", Double.parseDouble(south));
+            String[] split = content.split(" ");
+            String east = split[0];
+            String north = split[1];
+
+            DoublePoint northField = new DoublePoint ("north", Double.parseDouble(north));
             DoublePoint eastField = new DoublePoint ("east", Double.parseDouble(east));
-            doc.add(southField);
+
+            System.out.println("Norte: " + north + "\tEste: " + east);
+            // Localizaciones norte y este
+            doc.add(northField);
             doc.add(eastField);
-            doc.add(new TextField(tipo.substring(3), new StringReader(content)));
           }
 
+          // Creación del fichero de indexación
           if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-            // New index, so we just add the document (no old document can be there):
             System.out.println("adding " + file);
             writer.addDocument(doc);
           } else {
-            // Existing index (an old copy of this document may have been indexed) so 
-            // we use updateDocument instead to replace the old one matching the exact 
-            // path, if present:
             System.out.println("updating " + file);
             writer.updateDocument(new Term("path", file.getPath()), doc);
           }
-          
+          System.out.println();
+
         } catch (ParserConfigurationException e) {
           throw new RuntimeException(e);
         } catch (SAXException e) {

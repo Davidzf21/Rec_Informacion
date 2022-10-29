@@ -1,12 +1,2 @@
-creator:Jorge +subject:Economia
-+creator:Guillermo +title:ocupacional
-title:Informatica -type:TESIS
-date:2006
-title:"Complex Systems: Nonlinearity and Structural Complexity in spatially extended and discrete systems"
-title:"Fisica Quimica"∼2
-title:java*
-title:un*r
-title:java∼
-date:[2008 TO 2009]
-
-
+spatial:-180.0,180.0,-90.0,90.0 title:natura
+spatial:-180.0,180.0,-90.0,90.0 title:nacional
