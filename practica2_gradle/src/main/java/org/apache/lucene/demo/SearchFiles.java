@@ -21,6 +21,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
+import opennlp.tools.chunker.ChunkerME;
+import opennlp.tools.chunker.ChunkerModel;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
@@ -191,6 +195,19 @@ public class SearchFiles {
       String identifier = listaHijos.item(1).getTextContent();
       String text = listaHijos.item(3).getTextContent();
 
+      SimpleTokenizer tokenizer = SimpleTokenizer.INSTANCE;
+      String[] tokens = tokenizer.tokenize(text);
+
+      InputStream inputStream = new FileInputStream("maxent-pos-universal.model");
+      POSModel posModel = new POSModel(inputStream);
+      POSTaggerME posTagger = new POSTaggerME(posModel);
+      String tags[] = posTagger.tag(tokens);
+      for (int o = 0; o<tags.length; o++){
+        if((tags[o].toString()).equals("NUM")){
+          System.out.println(tags[o]+" -- "+tokens[o].toString());
+        }
+      }
+      System.out.println("------------");
       out.write(identifier + " - " + text + "\n");
     }
   }
