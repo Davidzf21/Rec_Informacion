@@ -200,7 +200,7 @@ public class IndexFiles {
                   "dc:publisher",
                   "dc:contributor",
                   "dc:date",
-                  "dc:type",
+                  "dc:type"
           };
 
           for(String tipo : tipos)

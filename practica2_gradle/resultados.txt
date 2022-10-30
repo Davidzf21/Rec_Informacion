@@ -1,38 +1,5 @@
-1	17-natura2k.xml
-1	12-ign-fr-3.xml
-1	13-AEAG-7.xml
-1	14-DIREN-1.xml
-1	15-SMEAG-1.xml
-1	16-nuts.xml
-1	18-eurographics-1.xml
-1	19-DMA-CHE-1.xml
-1	20-IDE-GV-1.xml
-1	21-CLC2000_aragon.xml
-1	23-img2k_2.xml
-1	24-USGS-BULLETIN-1.xml
-1	25-USGS-DIGITAL-170.xml
-1	26-USGS-MINERAL-247.xml
-1	27-USGS-REPORTS-751.xml
-1	28-USGS-PROVISIONAL-1008.xml
-1	29-IDENA-AG-1.xml
-1	30-IDENA-S-1.xml
-2	12-ign-fr-3.xml
-2	13-AEAG-7.xml
-2	14-DIREN-1.xml
-2	15-SMEAG-1.xml
-2	16-nuts.xml
-2	17-natura2k.xml
-2	18-eurographics-1.xml
-2	19-DMA-CHE-1.xml
-2	20-IDE-GV-1.xml
-2	21-CLC2000_aragon.xml
-2	23-img2k_2.xml
-2	24-USGS-BULLETIN-1.xml
-2	25-USGS-DIGITAL-170.xml
-2	26-USGS-MINERAL-247.xml
-2	27-USGS-REPORTS-751.xml
-2	28-USGS-PROVISIONAL-1008.xml
-2	29-IDENA-AG-1.xml
-2	30-IDENA-S-1.xml
-2	01-mtn25.xml
-2	05-mtn50.xml
+105-5 - ¿Qué trabajos o tesis existen sobre el caciquismo, la dictadura, o la represión política relacionados con Huesca, o en su defecto España, y centrados si es posible en el siglo XX?
+106-4 - ¿Qué trabajos relacionados con la Ingeniería Biomédica se han desarrollado preferentemente en un Departamento de Ingeniería sobre el diagnóstico de enfermedades neurodegenerativas? Ejemplos de estas enfermedades son el Alzheimer o el Parkinson.
+107-2 - Análisis de la evolucion económica de España desde la crisis de 2008 hasta 2019 en relacion con los diferentes partidos politicos que han gobernado el país durante este periodo o con cualquier otro aspecto de relevancia social.
+109-2 - Estoy interesado en trabajos académicos sobre Bioinformática (también conocida como Biología Computacional, Bioinformatics o Computational Biology) o Filogenética (Phylogenetics), publicados entre 2010 y 2018.
+208-1 - Busco Trabajos de Fin de Grado de los últimos 10 años en español. Deben ser del campo de la informática (Computer Science) realizados o dirigidos por alguien llamado Javier.

@@ -24,11 +24,22 @@ import java.nio.file.Paths;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import java.io.*;
+
+import opennlp.tools.tokenize.SimpleTokenizer;
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
@@ -75,22 +86,56 @@ public class SearchFiles {
     return SpatialQuery;
   }
 
-  public static Query BuildNormalQuery(String line, String field, Analyzer analyzer) throws Exception
+  public static Query BuildNormalQuery(String line, String field, Analyzer analyzer, boolean hasSpatial) throws Exception
   {
     QueryParser parser = new QueryParser(field, analyzer);
     String[] queriesStrings = line.split(" ");
     String notSpatialStr = "";
 
-    for(int i = 1; i < queriesStrings.length; i++)
+    int first = hasSpatial ? 1 : 0;
+
+    for(int i = first; i < queriesStrings.length; i++)
       notSpatialStr += queriesStrings[i];
 
     Query query = parser.parse(notSpatialStr);
     return query;
   }
 
-  public static void ExeInfoNeeds(Analyzer analyzer, IndexSearcher searcher, BufferedReader in, BufferedWriter out) throws Exception
+  public static Query BuildFechasQuery(String line) throws Exception
   {
+    BooleanQuery.Builder fullQueryBuilder = new BooleanQuery.Builder();
 
+    Pattern pattern = Pattern.compile("(issued|created):(\\[([0-9]+|\\*) TO ([0-9]+|\\*)\\]|[0-9]+)");
+    Matcher matcher = pattern.matcher(line);
+
+    while(matcher.find()){
+      String consulta = matcher.group();
+      String[] consultaInterna = consulta.split(":");
+
+      if(consultaInterna[1].contains("[")) {
+        String[] rangos = consultaInterna[1].replace("[","").replace("]","").split(" ");
+        String rangoIzq = null;
+        String rangoDch = null;
+
+        if(rangos[0].equals("*")){          // [* TO 1234]
+          rangoDch = rangos[2];
+
+        } else if(rangos[2].equals("*")) {  // [1234 TO *]
+          rangoIzq = rangos[0];
+
+        } else {                       // [1234 TO 1234]
+          rangoIzq = rangos[0];
+          rangoDch = rangos[2];
+        }
+
+        Query trq = TermRangeQuery.newStringRange(consultaInterna[0], rangoIzq, rangoDch, true, true);
+        fullQueryBuilder.add(trq, BooleanClause.Occur.SHOULD);
+
+      } else {
+        fullQueryBuilder.add(new TermQuery (new Term(consultaInterna[0], consultaInterna[1])), BooleanClause.Occur.SHOULD);
+      }
+    }
+    return fullQueryBuilder.build();
   }
 
   public static void ExeNormalExecution(String field, Analyzer analyzer, String queryString, IndexSearcher searcher, BufferedReader in, BufferedWriter out) throws Exception
@@ -104,8 +149,11 @@ public class SearchFiles {
       }
 
       BooleanQuery SpatialQuery = BuildSpatialQuery(line);
-      Query notSpatialQuery = BuildNormalQuery(line, field, analyzer);
-      // Query fechasQuery = BuildFechasQuery(line);
+      Query fechasQuery = BuildFechasQuery(line);
+      Query notSpatialQuery = null;
+
+      if(fechasQuery == null)
+        notSpatialQuery = BuildNormalQuery(line, field, analyzer, SpatialQuery != null);
 
       BooleanQuery.Builder builder = new BooleanQuery.Builder();
       if(SpatialQuery != null){
@@ -114,15 +162,36 @@ public class SearchFiles {
       if(notSpatialQuery != null){
         builder.add(notSpatialQuery, BooleanClause.Occur.SHOULD);
       }
-      // if(fechasQuery != null) {
-      //   builder.add(fechasQuery, BooleanClause.Occur.SHOULD);
-      // }
+      if(fechasQuery != null) {
+        builder.add(fechasQuery, BooleanClause.Occur.SHOULD);
+      }
 
       BooleanQuery query = builder.build();
 
       System.out.println("Searching for: " + query.toString(field));
       doPagingSearch(out, searcher, query, numQuery);
       numQuery++;
+    }
+  }
+
+  public static void ExeInfoNeeds(String file, BufferedWriter out) throws Exception
+  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    org.w3c.dom.Document document = builder.parse(new File(file));
+    Element root = document.getDocumentElement();
+    NodeList listaNodos = root.getElementsByTagName("informationNeed");
+
+    // Recorremos todos los informationNeed
+    for (int i =0; i<listaNodos.getLength(); i++){
+      Node nodo = listaNodos.item(i);
+      NodeList listaHijos = nodo.getChildNodes();
+
+      // Obtenemos el contenido del identifier
+      String identifier = listaHijos.item(1).getTextContent();
+      String text = listaHijos.item(3).getTextContent();
+
+      out.write(identifier + " - " + text + "\n");
     }
   }
 
@@ -178,23 +247,6 @@ public class SearchFiles {
       }
     }
 
-    // Creamos el buscador y analizador
-    IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
-    IndexSearcher searcher = new IndexSearcher(reader);
-    Analyzer analyzer = new SpanishAnalyzer2();
-
-    // Obtenemos la entrada de la búsqueda
-    BufferedReader in = null;
-    if(infoNeeds != null)    {
-      in = new BufferedReader(new InputStreamReader(new FileInputStream(infoNeeds), StandardCharsets.UTF_8));
-
-    } else if (queries != null) {
-      in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), StandardCharsets.UTF_8));
-
-    } else {
-      in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-    }
-
     // Obtenemos la salida de la búsqueda
     BufferedWriter out = null;
     if (output != null) {
@@ -206,19 +258,37 @@ public class SearchFiles {
 
     // Si se pide usar infoNeeds o no
     if(infoNeeds != null)
-      ExeInfoNeeds(analyzer, searcher, in, out);
+    {
+      ExeInfoNeeds(infoNeeds, out);
+    }
     else
+    {
+      // Creamos el buscador y analizador
+      IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+      IndexSearcher searcher = new IndexSearcher(reader);
+      Analyzer analyzer = new SpanishAnalyzer2();
+
+      // Obtenemos la entrada de la búsqueda
+      BufferedReader in = null;
+      if (queries != null) {
+        in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), StandardCharsets.UTF_8));
+
+      } else {
+        in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+      }
+
       ExeNormalExecution(field, analyzer, queryString, searcher, in, out);
+      in.close();
+      reader.close();
+    }
 
     // Cerramos los Streams
-    in.close();
     out.close();
-    reader.close();
   }
 
    public static void doPagingSearch(BufferedWriter out, IndexSearcher searcher, BooleanQuery query, int numQuery) throws IOException
    {
-    TopDocs results = searcher.search(query, 100);
+    TopDocs results = searcher.search(query, Integer.MAX_VALUE);
     ScoreDoc[] hits = results.scoreDocs;
 
     int numTotalHits = Math.toIntExact(results.totalHits.value);

@@ -1,2 +1,6 @@
-spatial:-180.0,180.0,-90.0,90.0 title:natura
-spatial:-180.0,180.0,-90.0,90.0 title:nacional
+issued:[1980 TO 2010]
+created:[1980 TO 2010]
+issued:[1980 TO 2010] created:[1980 TO 2010]
+issued:[19890101 TO 19950101]
+issued:19940101
+issued:[* TO 1994]

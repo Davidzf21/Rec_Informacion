@@ -187,7 +187,7 @@ public class IndexFiles {
                   "dc:publisher",
                   "dc:contributor",
                   "dc:date",
-                  "dc:type",
+                  "dc:type"
           };
 
           // Tipos
@@ -200,13 +200,33 @@ public class IndexFiles {
             }
           }
 
-          // Obtención del campo ows:LowerCorner
-          org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName("ows:LowerCorner");
-          if(listaNodos.getLength() == 1) {
-            Node nodo = listaNodos.item(0);
-            String content = nodo.getTextContent();
+          // Issued
+          org.w3c.dom.NodeList listaNodosIssued = doc2.getElementsByTagName("dcterms:issued");
+          Node nodoIssued = listaNodosIssued.item(0);
+          if(nodoIssued != null)
+          {
+            String contentIssued = nodoIssued.getTextContent();
+            String fecha = contentIssued.replace("-", "");
+            doc.add(new StringField("issued", fecha, Field.Store.NO));
+          }
 
-            String[] split = content.split(" ");
+          // Created
+          org.w3c.dom.NodeList listaNodosCreated = doc2.getElementsByTagName("dcterms:created");
+          Node nodoCreated = listaNodosCreated.item(0);
+          if(nodoCreated != null)
+          {
+            String contentCreated = nodoCreated.getTextContent();
+            String fecha = contentCreated.replace("-", "");
+            doc.add(new StringField("created", fecha, Field.Store.NO));
+          }
+
+          // Obtención del campo ows:LowerCorner
+          org.w3c.dom.NodeList listaNodosLowCorner = doc2.getElementsByTagName("ows:LowerCorner");
+          if(listaNodosLowCorner.getLength() == 1) {
+            Node nodoLowCorner = listaNodosLowCorner.item(0);
+            String contentLowCorener = nodoLowCorner.getTextContent();
+
+            String[] split = contentLowCorener.split(" ");
             String west = split[0];
             String south = split[1];
 
@@ -221,12 +241,12 @@ public class IndexFiles {
           }
 
           // Obtención del campo ows:UpperCorner
-          org.w3c.dom.NodeList listaNodos2 = doc2.getElementsByTagName("ows:UpperCorner");
-          if(listaNodos2.getLength() == 1) {
-            Node nodo = listaNodos2.item(0);
-            String content = nodo.getTextContent();
+          org.w3c.dom.NodeList listaNodosUpCorener = doc2.getElementsByTagName("ows:UpperCorner");
+          if(listaNodosUpCorener.getLength() == 1) {
+            Node nodoUpCorener = listaNodosUpCorener.item(0);
+            String contentUpCorener = nodoUpCorener.getTextContent();
 
-            String[] split = content.split(" ");
+            String[] split = contentUpCorener.split(" ");
             String east = split[0];
             String north = split[1];
 
