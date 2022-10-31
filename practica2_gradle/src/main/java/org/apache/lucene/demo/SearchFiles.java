@@ -23,8 +23,11 @@ import java.nio.file.Paths;
 
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
+import opennlp.tools.namefind.NameFinderME;
+import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.util.Span;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
@@ -36,6 +39,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -173,18 +177,24 @@ public class SearchFiles {
       BooleanQuery query = builder.build();
 
       System.out.println("Searching for: " + query.toString(field));
-      doPagingSearch(out, searcher, query, numQuery);
+      doPagingSearch(out, searcher, query, Integer.toString(numQuery));
       numQuery++;
     }
   }
 
-  public static void ExeInfoNeeds(String file, BufferedWriter out) throws Exception
+  public static void ExeInfoNeeds(String field, Analyzer analyzer, IndexSearcher searcher, String file, BufferedWriter out) throws Exception
   {
+    QueryParser parser = new QueryParser(field, analyzer);
+
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = factory.newDocumentBuilder();
     org.w3c.dom.Document document = builder.parse(new File(file));
     Element root = document.getDocumentElement();
     NodeList listaNodos = root.getElementsByTagName("informationNeed");
+
+    InputStream inputStream = new FileInputStream("maxent-pos-universal.model");
+    POSModel posModel = new POSModel(inputStream);
+    POSTaggerME posTagger = new POSTaggerME(posModel);
 
     // Recorremos todos los informationNeed
     for (int i =0; i<listaNodos.getLength(); i++){
@@ -194,19 +204,83 @@ public class SearchFiles {
       // Obtenemos el contenido del identifier
       String identifier = listaHijos.item(1).getTextContent();
       String text = listaHijos.item(3).getTextContent();
+      System.out.println(identifier);
+
+      // Creamos la consulta
+      BooleanQuery.Builder booleanBuilder = new BooleanQuery.Builder();
 
       SimpleTokenizer tokenizer = SimpleTokenizer.INSTANCE;
       String[] tokens = tokenizer.tokenize(text);
 
-      InputStream inputStream = new FileInputStream("maxent-pos-universal.model");
-      POSModel posModel = new POSModel(inputStream);
-      POSTaggerME posTagger = new POSTaggerME(posModel);
       String tags[] = posTagger.tag(tokens);
+      ArrayList<String> numeros = new ArrayList<>();
       for (int o = 0; o<tags.length; o++){
-        if((tags[o].toString()).equals("NUM")){
-          System.out.println(tags[o]+" -- "+tokens[o].toString());
+        // Consultamos los sustantivos
+        if(tags[o].equals("NOUN")){
+          Query publisherQuery = parser.parse("publisher:"+tokens[o]);
+          Query subjectQuery = parser.parse("subject:"+tokens[o]);
+          Query descriptionQuery = parser.parse("description:"+tokens[o]);
+          Query titleQuery = parser.parse("title:"+tokens[o]);
+
+          Query creatorQuery = parser.parse("creator:"+tokens[o]);
+          Query contributorQuery = parser.parse("contributor:"+tokens[o]);
+          booleanBuilder.add(publisherQuery, BooleanClause.Occur.SHOULD)
+                  .add(subjectQuery, BooleanClause.Occur.SHOULD)
+                  .add(descriptionQuery, BooleanClause.Occur.SHOULD)
+                  .add(titleQuery, BooleanClause.Occur.SHOULD)
+                  .add(creatorQuery, BooleanClause.Occur.SHOULD)
+                  .add(contributorQuery, BooleanClause.Occur.SHOULD);
+        }
+        // Consultamos los números
+        else if(tags[o].equals("NUM")){
+          numeros.add(tokens[o]);
         }
       }
+
+      // Si pide una fecha en concreto
+      if(numeros.size() == 1)
+      {
+        Query dateQuery = parser.parse("date:"+numeros.get(0));
+        booleanBuilder.add(dateQuery, BooleanClause.Occur.SHOULD);
+      }
+      // Si pide un rango de fechas
+      else if(numeros.size() > 1)
+      {
+        Query dateQuery = TermRangeQuery.newStringRange("date", numeros.get(0), numeros.get(1), true, true);
+        booleanBuilder.add(dateQuery, BooleanClause.Occur.SHOULD);
+      }
+
+      // Regex de TFG
+      Pattern patternTFG = Pattern.compile("\\[TFG|Trabajo (de )?Fin (de)?Grado\\]");
+      Matcher matcherTFG = patternTFG.matcher(text);
+      if(matcherTFG.find()){
+        Query langQuery = parser.parse("type:TFG");
+        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+      }
+
+      // Regex de Tesis
+      Pattern patternTesis = Pattern.compile("\\[T|t\\]esis");
+      Matcher matcherTesis = patternTesis.matcher(text);
+      if(matcherTesis.find()){
+        Query langQuery = parser.parse("type:Tesis");
+        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+      }
+
+      // Regex de idioma
+      if(text.contains("en español")){
+        Query langQuery = parser.parse("language:es");
+        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+      }
+      if(text.contains("en inglés")){
+        Query langQuery = parser.parse("language:en");
+        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+      }
+
+      BooleanQuery query = booleanBuilder.build();
+
+      System.out.println("Searching for: " + query.toString(field));
+      doPagingSearch(out, searcher, query, identifier);
+
       System.out.println("------------");
       out.write(identifier + " - " + text + "\n");
     }
@@ -273,18 +347,18 @@ public class SearchFiles {
       out = new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
     }
 
+    // Creamos el buscador y analizador
+    IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
+    IndexSearcher searcher = new IndexSearcher(reader);
+    Analyzer analyzer = new SpanishAnalyzer2();
+
     // Si se pide usar infoNeeds o no
     if(infoNeeds != null)
     {
-      ExeInfoNeeds(infoNeeds, out);
+      ExeInfoNeeds(field, analyzer, searcher, infoNeeds, out);
     }
     else
     {
-      // Creamos el buscador y analizador
-      IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
-      IndexSearcher searcher = new IndexSearcher(reader);
-      Analyzer analyzer = new SpanishAnalyzer2();
-
       // Obtenemos la entrada de la búsqueda
       BufferedReader in = null;
       if (queries != null) {
@@ -303,7 +377,7 @@ public class SearchFiles {
     out.close();
   }
 
-   public static void doPagingSearch(BufferedWriter out, IndexSearcher searcher, BooleanQuery query, int numQuery) throws IOException
+   public static void doPagingSearch(BufferedWriter out, IndexSearcher searcher, BooleanQuery query, String idQuery) throws IOException
    {
     TopDocs results = searcher.search(query, Integer.MAX_VALUE);
     ScoreDoc[] hits = results.scoreDocs;
@@ -320,11 +394,11 @@ public class SearchFiles {
       Document doc = searcher.doc(hits[i].doc);
       String path = doc.get("path");
 
-      System.out.println(path + "\n" + searcher.explain(query,hits[i].doc));
+      //System.out.println(path + "\n" + searcher.explain(query,hits[i].doc));
 
       if (path != null) {
         String[] a = path.split("\\\\");
-        out.write(numQuery + "\t" + a[a.length - 1] + "\n");
+        out.write(idQuery + "\t" + a[a.length - 1] + "\n");
       }
     }
   }
