@@ -105,45 +105,54 @@ public class SearchFiles {
     for(int i = first; i < queriesStrings.length; i++)
       notSpatialStr += queriesStrings[i];
 
-    Query query = parser.parse(notSpatialStr);
+    Query query = null;
+    if(!notSpatialStr.equals(""))
+      query = parser.parse(notSpatialStr);
     return query;
   }
 
   public static Query BuildFechasQuery(String line) throws Exception
   {
     BooleanQuery.Builder fullQueryBuilder = new BooleanQuery.Builder();
+    Query returnQuery = null;
 
     Pattern pattern = Pattern.compile("(issued|created):(\\[([0-9]+|\\*) TO ([0-9]+|\\*)\\]|[0-9]+)");
     Matcher matcher = pattern.matcher(line);
 
-    while(matcher.find()){
-      String consulta = matcher.group();
-      String[] consultaInterna = consulta.split(":");
+    if(matcher.find())
+    {
+      while(matcher.find()){
+        String consulta = matcher.group();
+        String[] consultaInterna = consulta.split(":");
 
-      if(consultaInterna[1].contains("[")) {
-        String[] rangos = consultaInterna[1].replace("[","").replace("]","").split(" ");
-        String rangoIzq = null;
-        String rangoDch = null;
+        if(consultaInterna[1].contains("[")) {
+          String[] rangos = consultaInterna[1].replace("[","").replace("]","").split(" ");
+          String rangoIzq = null;
+          String rangoDch = null;
 
-        if(rangos[0].equals("*")){          // [* TO 1234]
-          rangoDch = rangos[2];
+          if(rangos[0].equals("*")){          // [* TO 1234]
+            rangoDch = rangos[2];
 
-        } else if(rangos[2].equals("*")) {  // [1234 TO *]
-          rangoIzq = rangos[0];
+          } else if(rangos[2].equals("*")) {  // [1234 TO *]
+            rangoIzq = rangos[0];
 
-        } else {                       // [1234 TO 1234]
-          rangoIzq = rangos[0];
-          rangoDch = rangos[2];
+          } else {                       // [1234 TO 1234]
+            rangoIzq = rangos[0];
+            rangoDch = rangos[2];
+          }
+
+          Query trq = TermRangeQuery.newStringRange(consultaInterna[0], rangoIzq, rangoDch, true, true);
+          fullQueryBuilder.add(trq, BooleanClause.Occur.SHOULD);
+
+        } else {
+          fullQueryBuilder.add(new TermQuery (new Term(consultaInterna[0], consultaInterna[1])), BooleanClause.Occur.SHOULD);
         }
-
-        Query trq = TermRangeQuery.newStringRange(consultaInterna[0], rangoIzq, rangoDch, true, true);
-        fullQueryBuilder.add(trq, BooleanClause.Occur.SHOULD);
-
-      } else {
-        fullQueryBuilder.add(new TermQuery (new Term(consultaInterna[0], consultaInterna[1])), BooleanClause.Occur.SHOULD);
       }
+
+      returnQuery = fullQueryBuilder.build();
     }
-    return fullQueryBuilder.build();
+
+    return returnQuery;
   }
 
   public static void ExeNormalExecution(String field, Analyzer analyzer, String queryString, IndexSearcher searcher, BufferedReader in, BufferedWriter out) throws Exception
@@ -251,19 +260,27 @@ public class SearchFiles {
       }
 
       // Regex de TFG
-      Pattern patternTFG = Pattern.compile("\\[TFG|Trabajo (de )?Fin (de)?Grado\\]");
+      Pattern patternTFG = Pattern.compile("\\[TFG|Trabajo (de )?Fin (de )?Grado\\]");
       Matcher matcherTFG = patternTFG.matcher(text);
       if(matcherTFG.find()){
-        Query langQuery = parser.parse("type:TFG");
-        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+        Query tfgQuery = parser.parse("type:tfg");
+        booleanBuilder.add(tfgQuery, BooleanClause.Occur.SHOULD);
       }
 
       // Regex de Tesis
       Pattern patternTesis = Pattern.compile("\\[T|t\\]esis");
       Matcher matcherTesis = patternTesis.matcher(text);
       if(matcherTesis.find()){
-        Query langQuery = parser.parse("type:Tesis");
-        booleanBuilder.add(langQuery, BooleanClause.Occur.SHOULD);
+        Query tesisQuery = parser.parse("type:tesis");
+        booleanBuilder.add(tesisQuery, BooleanClause.Occur.SHOULD);
+      }
+
+      // Regex de TFM
+      Pattern patternTFM = Pattern.compile("\\[TFM|Trabajo (de )?Fin (de )?Master\\]");
+      Matcher matcherTFM = patternTFM.matcher(text);
+      if(matcherTFM.find()){
+        Query tfmQuery = parser.parse("type:tfm");
+        booleanBuilder.add(tfmQuery, BooleanClause.Occur.SHOULD);
       }
 
       // Regex de idioma
@@ -394,7 +411,7 @@ public class SearchFiles {
       Document doc = searcher.doc(hits[i].doc);
       String path = doc.get("path");
 
-      //System.out.println(path + "\n" + searcher.explain(query,hits[i].doc));
+      System.out.println(path + "\n" + searcher.explain(query,hits[i].doc));
 
       if (path != null) {
         String[] a = path.split("\\\\");

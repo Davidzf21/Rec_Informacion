@@ -43,6 +43,7 @@ import java.util.Date;
  * Run it with no command-line arguments for usage information.
  */
 public class IndexFiles {
+  static boolean print = true;
 
   private IndexFiles() {}
 
@@ -142,6 +143,7 @@ public class IndexFiles {
    */
   static void indexDocs(IndexWriter writer, File file)
     throws IOException {
+
     // do not try to index files that cannot be read
     if (file.canRead()) {
       if (file.isDirectory()) {
@@ -171,7 +173,8 @@ public class IndexFiles {
           Field pathField = new StringField("path", file.getPath(), Field.Store.YES);
           doc.add(pathField);
 
-          System.out.println(file.getPath());
+          if(print)
+            System.out.println(file.getPath());
 
           // Ultima modificación
           doc.add(new StoredField("modified", file.lastModified()));
@@ -185,9 +188,7 @@ public class IndexFiles {
                   "dc:subject",
                   "dc:description",
                   "dc:publisher",
-                  "dc:contributor",
-                  "dc:date",
-                  "dc:type"
+                  "dc:contributor"
           };
 
           // Tipos
@@ -200,6 +201,40 @@ public class IndexFiles {
             }
           }
 
+          // Fecha
+          org.w3c.dom.NodeList listaNodosDate = doc2.getElementsByTagName("dc:date");
+          Node nodoDate = listaNodosDate.item(0);
+          if(nodoDate != null)
+          {
+            String contentDate = nodoDate.getTextContent();
+            doc.add(new StringField("date", contentDate, Field.Store.YES));
+          }
+
+
+          // Tipo de proyecto
+          org.w3c.dom.NodeList listaNodosTipo = doc2.getElementsByTagName("dc:type");
+          Node nodoTipo = listaNodosTipo.item(0);
+          if(nodoTipo != null)
+          {
+            String contentTipo = nodoTipo.getTextContent();
+            String tipo = "";
+
+            if(contentTipo.equals("TAZ-TFG")){
+              tipo = "tfg";
+            }
+            else if(contentTipo.equals("TAZ-TFM")){
+              tipo = "tfm";
+            }
+            else if(contentTipo.equals("TAZ-PFC")){
+              tipo = "tfg";
+            }
+            else if(contentTipo.equals("TESIS")){
+              tipo = "tesis";
+            }
+
+            doc.add(new StringField("type", tipo, Field.Store.YES));
+          }
+
           // Issued
           org.w3c.dom.NodeList listaNodosIssued = doc2.getElementsByTagName("dcterms:issued");
           Node nodoIssued = listaNodosIssued.item(0);
@@ -207,7 +242,7 @@ public class IndexFiles {
           {
             String contentIssued = nodoIssued.getTextContent();
             String fecha = contentIssued.replace("-", "");
-            doc.add(new StringField("issued", fecha, Field.Store.NO));
+            doc.add(new StringField("issued", fecha, Field.Store.YES));
           }
 
           // Created
@@ -217,7 +252,7 @@ public class IndexFiles {
           {
             String contentCreated = nodoCreated.getTextContent();
             String fecha = contentCreated.replace("-", "");
-            doc.add(new StringField("created", fecha, Field.Store.NO));
+            doc.add(new StringField("created", fecha, Field.Store.YES));
           }
 
           // Obtención del campo ows:LowerCorner
@@ -229,8 +264,6 @@ public class IndexFiles {
             String[] split = contentLowCorener.split(" ");
             String west = split[0];
             String south = split[1];
-
-            System.out.println("Oeste: " + west + "\tSur: " + south);
 
             DoublePoint southField = new DoublePoint ("south", Double.parseDouble(south));
             DoublePoint westField = new DoublePoint ("west", Double.parseDouble(west));
@@ -253,7 +286,6 @@ public class IndexFiles {
             DoublePoint northField = new DoublePoint ("north", Double.parseDouble(north));
             DoublePoint eastField = new DoublePoint ("east", Double.parseDouble(east));
 
-            System.out.println("Norte: " + north + "\tEste: " + east);
             // Localizaciones norte y este
             doc.add(northField);
             doc.add(eastField);
@@ -261,13 +293,16 @@ public class IndexFiles {
 
           // Creación del fichero de indexación
           if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-            System.out.println("adding " + file);
+            if(print)
+              System.out.println("adding " + file);
             writer.addDocument(doc);
           } else {
-            System.out.println("updating " + file);
+            if(print)
+              System.out.println("updating " + file);
             writer.updateDocument(new Term("path", file.getPath()), doc);
           }
-          System.out.println();
+          if(print)
+            System.out.println();
 
         } catch (ParserConfigurationException e) {
           throw new RuntimeException(e);
