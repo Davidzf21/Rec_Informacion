@@ -19,6 +19,7 @@ public class Main {
     {
         public double documentosNR = 0;
         public double documentosR = 0;
+        public int contados = 0;
 
         public int relevantesTotales;
 
@@ -29,11 +30,15 @@ public class Main {
 
         public void NuevoNoRelevante()
         {
-            documentosNR++;
+            if(contados < 45)
+                documentosNR++;
+            contados++;
         }
         public void NuevoRelevante()
         {
-            documentosR++;
+            if(contados < 45)
+                documentosR++;
+            contados++;
         }
 
         public Resultado ObtenerResultado()
@@ -200,7 +205,7 @@ public class Main {
                 double precision10 = 0;
                 double MAP = 0;
 
-                for(int i = 0; i < documentos.size(); i++)
+                for(int i = 0; i < documentos.size() && i < 45; i++)
                 {
                     String necesidadDoc = documentos.get(i);
                     boolean relevante = false;
