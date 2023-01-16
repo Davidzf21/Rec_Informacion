@@ -1,0 +1,195 @@
+# Hecho por Jorge Lisa Laborda (774248) y David Zandundo Fuster (780500)
+
+@prefix zaguanVoc: <http://www.practicaZaguan.com/zaguan#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . 
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# --------------------------------
+# ---- CONCEPTOS DE EDUCACIÓN ----
+# --------------------------------
+	
+zaguanVoc:Educación rdf:type skos:Concept ;
+	rdfs:prefLabel "Educación" ;
+	rdfs:narrower zaguanVoc:SistemasNiveles ;
+	rdfs:narrower zaguanVoc:Establecimientos ;
+	rdfs:narrower zaguanVoc:Enseñanza ;
+	rdfs:narrower zaguanVoc:Evaluación .
+	
+zaguanVoc:SistemasNiveles rdf:type skos:Concept ;	 		
+	rdfs:prefLabel "Sistemas y niveles de enseñanza" ;
+	rdfs:broader zaguanVoc:Educación .
+	
+zaguanVoc:Establecimientos rdf:type skos:Concept ;			
+	rdfs:prefLabel "Establecimientos de enseñanza" ;
+	rdfs:broader zaguanVoc:Educación .
+	
+zaguanVoc:Enseñanza rdf:type skos:Concept ;				
+	rdfs:prefLabel "Enseñanza y formación" ;
+	rdfs:broader zaguanVoc:Educación .
+	
+zaguanVoc:Evaluación rdf:type skos:Concept ;				
+	rdfs:prefLabel "Evaluación de la educación" ;
+	rdfs:broader zaguanVoc:Educación .
+	
+# --------------------------------------------
+# ---- CONCEPTOS DE CIENCIAS Y TECNOLOGÍA ----
+# --------------------------------------------
+	
+zaguanVoc:CyT rdf:type skos:Concept ;
+	rdfs:prefLabel "Ciencia y tecnología" ;
+	rdfs:narrower zaguanVoc:Matemáticas ;
+	rdfs:narrower zaguanVoc:Física ;
+	rdfs:narrower zaguanVoc:Química ;
+	rdfs:narrower zaguanVoc:Estadística ;
+	rdfs:narrower zaguanVoc:Geografía ;
+	rdfs:narrower zaguanVoc:Biología ;
+	rdfs:narrower zaguanVoc:Medicina ;
+	rdfs:narrower zaguanVoc:Informática .
+	
+zaguanVoc:Matemáticas rdf:type skos:Concept ;			
+	rdfs:prefLabel "Matemáticas" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Física rdf:type skos:Concept ;				
+	rdfs:prefLabel "Físicas" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Química rdf:type skos:Concept ;				
+	rdfs:prefLabel "Química" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Estadística rdf:type skos:Concept ;	 			
+	rdfs:prefLabel "Estadística" ;
+	rdfs:broader zaguanVoc:CyT .
+
+zaguanVoc:Geografía rdf:type skos:Concept ;			
+	rdfs:prefLabel "Geografía" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Biología rdf:type skos:Concept ;				
+	rdfs:prefLabel "Biología" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Medicina rdf:type skos:Concept ;				
+	rdfs:prefLabel "Medicina" ;
+	rdfs:broader zaguanVoc:CyT .
+	
+zaguanVoc:Informática rdf:type skos:Concept ;			
+	rdfs:prefLabel "Informática" ;
+	rdfs:broader zaguanVoc:CyT .
+
+# ------------------------------
+# ---- CONCEPTOS DE CULTURA ----
+# ------------------------------
+
+zaguanVoc:Cultura rdf:type skos:Concept ;
+	rdfs:prefLabel "Cultura" ;
+	rdfs:narrower zaguanVoc:Filosofía ;
+	rdfs:narrower zaguanVoc:Religión ;
+	rdfs:narrower zaguanVoc:Historia ;
+	rdfs:narrower zaguanVoc:Lengua ;
+	rdfs:narrower zaguanVoc:Literatura ;
+	rdfs:narrower zaguanVoc:Arte ;
+	rdfs:narrower zaguanVoc:Ocio .
+	
+zaguanVoc:Filosofía rdf:type skos:Concept ;		 	
+	rdfs:prefLabel "Filosofía" ;
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Religión rdf:type skos:Concept ;		 	
+	rdfs:prefLabel "Religión" ;
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Historia rdf:type skos:Concept ;		 		
+	rdfs:prefLabel "Historia" ;
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Lengua rdf:type skos:Concept ;		 		
+	rdfs:prefLabel "Lengua" ;
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Literatura rdf:type skos:Concept ;		 		
+	rdfs:prefLabel "Literatura" ;
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Arte rdf:type skos:Concept ;		 			
+	rdfs:prefLabel "Arte" ; 
+	rdfs:broader zaguanVoc:Cultura .
+	
+zaguanVoc:Ocio rdf:type skos:Concept ;		 			
+	rdfs:prefLabel "Ocio" ;
+	rdfs:broader zaguanVoc:Cultura .
+
+# ----------------------------------------
+# ---- CONCEPTOS DE CIENCIAS SOCIALES ----
+# ----------------------------------------
+
+zaguanVoc:CSocialies rdf:type skos:Concept ;
+	rdfs:prefLabel "Ciencias Sociales" ;
+	rdfs:narrower zaguanVoc:Psicología ;
+	rdfs:narrower zaguanVoc:Etnia ;
+	rdfs:narrower zaguanVoc:Población ;
+	rdfs:narrower zaguanVoc:Familia .
+	
+zaguanVoc:Psicología rdf:type skos:Concept ;	
+	rdfs:prefLabel "Psicología" ;
+	rdfs:broader zaguanVoc:CSocialies .
+	
+zaguanVoc:Etnia rdf:type skos:Concept ;				
+	rdfs:prefLabel "Etnia" ;
+	rdfs:broader zaguanVoc:CSocialies .
+	
+zaguanVoc:Población rdf:type skos:Concept ;			
+	rdfs:prefLabel "Población" ;
+	rdfs:broader zaguanVoc:CSocialies .
+	
+zaguanVoc:Familia rdf:type skos:Concept ;				
+	rdfs:prefLabel "Familia" ;
+	rdfs:broader zaguanVoc:CSocialies .
+
+# -------------------------------
+# ---- CONCEPTOS DE POLÍTICA ----
+# -------------------------------
+zaguanVoc:Política rdf:type skos:Concept ;
+	rdfs:prefLabel "Política" ;
+	rdfs:narrower zaguanVoc:Jurísdicción ;
+	rdfs:narrower zaguanVoc:Derechos ;
+	rdfs:narrower zaguanVoc:Gobierno ;
+	rdfs:narrower zaguanVoc:Internacionalidad ;
+	rdfs:narrower zaguanVoc:Economía ;
+	rdfs:narrower zaguanVoc:Industria ;
+	rdfs:narrower zaguanVoc:Finanzas ;
+	rdfs:narrower zaguanVoc:Trabajo .
+
+zaguanVoc:Jurísdicción rdf:type skos:Concept ;
+	rdfs:prefLabel "Juicio" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Derechos rdf:type skos:Concept ;
+	rdfs:prefLabel "Derechos humanos" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Gobierno	rdf:type skos:Concept ;
+	rdfs:prefLabel "Gobierno" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Internacionalidad rdf:type skos:Concept ;
+	rdfs:prefLabel "Relaciones internacionales" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Economía rdf:type skos:Concept ;			 	
+	rdfs:prefLabel "Economía" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Industria rdf:type skos:Concept ;			
+	rdfs:prefLabel "Industria" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Finanzas rdf:type skos:Concept ; 			
+	rdfs:prefLabel "Finanzas" ;
+	rdfs:broader zaguanVoc:Política .
+
+zaguanVoc:Trabajo rdf:type skos:Concept ;			 	
+	rdfs:prefLabel "Trabajo" ;
+	rdfs:broader zaguanVoc:Política .

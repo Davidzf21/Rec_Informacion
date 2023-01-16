@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'org.apache.lucene:lucene-core:8.6.2',
+            'org.apache.lucene:lucene-queryparser:8.6.2',
+            'org.apache.lucene:lucene-analyzers-common:8.6.2',
+            'org.apache.opennlp:opennlp-tools:2.0.0',
+            'org.apache.jena:jena-tdb2:3.5.0',
+            'org.apache.jena:jena-text:3.5.0',
+            'com.github.galigator.openllet:openllet-jena:2.6.3'
+}
+
+test {
+    useJUnitPlatform()
+}

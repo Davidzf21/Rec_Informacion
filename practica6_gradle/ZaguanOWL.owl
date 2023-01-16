@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="skos" IRI="http://www.w3.org/2004/02/skos/core#"/>
+    <Prefix name="zaguanVoc" IRI="http://www.practicaZaguan.com/zaguan#"/>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:Editor"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:Persona"/>
+    </Declaration>
+    <Declaration>
+        <Datatype abbreviatedIRI="xsd:date"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:contribuidor"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:fecha"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombrePerona"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:identificador"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:idioma"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:TFM"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:Tesis"/>
+    </Declaration>
+    <Declaration>
+        <AnnotationProperty abbreviatedIRI="rdfs:description"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:tema"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:apellido"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="zaguanVoc:TFG"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:editor"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:titulo"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:creador"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombreEditor"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty abbreviatedIRI="zaguanVoc:relacion"/>
+    </Declaration>
+    <SubClassOf>
+        <Class abbreviatedIRI="zaguanVoc:TFG"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="zaguanVoc:TFM"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class abbreviatedIRI="zaguanVoc:Tesis"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </SubClassOf>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:contribuidor"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:creador"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:editor"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:tema"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:contribuidor"/>
+        <Class abbreviatedIRI="zaguanVoc:Persona"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:creador"/>
+        <Class abbreviatedIRI="zaguanVoc:Persona"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:editor"/>
+        <Class abbreviatedIRI="zaguanVoc:Editor"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty abbreviatedIRI="zaguanVoc:tema"/>
+        <Class abbreviatedIRI="skos:Concept"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:apellido"/>
+        <Class abbreviatedIRI="zaguanVoc:Persona"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:fecha"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:identificador"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:idioma"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombreEditor"/>
+        <Class abbreviatedIRI="zaguanVoc:Editor"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombrePerona"/>
+        <Class abbreviatedIRI="zaguanVoc:Persona"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:relacion"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty abbreviatedIRI="zaguanVoc:titulo"/>
+        <Class abbreviatedIRI="zaguanVoc:Documento"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:apellido"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:fecha"/>
+        <Datatype abbreviatedIRI="xsd:date"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:identificador"/>
+        <Datatype abbreviatedIRI="xsd:anyURI"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:idioma"/>
+        <Datatype abbreviatedIRI="xsd:language"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:idioma"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombreEditor"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:nombrePerona"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:relacion"/>
+        <Datatype abbreviatedIRI="xsd:anyURI"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty abbreviatedIRI="zaguanVoc:titulo"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:description"/>
+        <AbbreviatedIRI>zaguanVoc:tema</AbbreviatedIRI>
+        <Literal>Elemento del tesauro (tema del documento)</Literal>
+    </AnnotationAssertion>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

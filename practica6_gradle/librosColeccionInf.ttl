@@ -1,0 +1,242 @@
+@prefix :      <http://www.w3.org/2002/07/owl#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix zaguanVoc: <http://www.practicaZaguan.com/zaguan#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+skos:Concept  a  owl:Class .
+
+zaguanVoc:nombreEditor
+        a            owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Editor ;
+        rdfs:range   xsd:string .
+
+zaguanVoc:tema  a         owl:ObjectProperty ;
+        rdfs:description  "Elemento del tesauro (tema del documento)" ;
+        rdfs:domain       zaguanVoc:Documento ;
+        rdfs:range        skos:Concept .
+
+zaguanVoc:creador  a  owl:ObjectProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   zaguanVoc:Persona .
+
+zaguanVoc:Editor  a  owl:Class .
+
+zaguanVoc:relacion  a  owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   xsd:anyURI .
+
+zaguanVoc:TFG  a         owl:Class ;
+        rdfs:subClassOf  zaguanVoc:Documento .
+
+zaguanVoc:TFM  a         owl:Class ;
+        rdfs:subClassOf  zaguanVoc:Documento .
+
+zaguanVoc:titulo  a  owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   xsd:string .
+
+zaguanVoc:identificador
+        a            owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   xsd:anyURI .
+
+zaguanVoc:nombrePerona
+        a            owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Persona ;
+        rdfs:range   xsd:string .
+
+rdfs:description  a  owl:AnnotationProperty .
+
+[ a                    "tfg" ;
+  <zaguanVoc:>         "Universidad de Zaragoza; Departamento de Lingüística General e Hispánica; Área de Comunicación Audiovisual y Publicidad" , "Gabelas Barroso, José Antonio" , "La televisión ocupa un espacio muy importante en el día a día de todo el mundo. La influencia que ésta ejerce sobre los públicos es muy grande y, por ello, la evolución que ha tenido la televisión de un tiempo a esta parte afecta de manera muy directa a la población. La telebasura es un fenómeno del que todo el mundo habla pero del que se tienen muy pocas premisas académicas. Se trata de un término subjetivo que no implica que todas las personas sean capaces de captarlo de la misma manera. Puede ser que lo que una persona considere telebasura no lo sea para otra. Entran en juego diferentes aspectos que hacen que el público se enfrente a los contenidos de la televisión de una manera diferente, dependiendo de sus condiciones personales, sus experiencias, sus prejuicios… los individuos tienen diferente escala de valores y por ello consideran apropiadas diferentes actuaciones o contenidos.  Es por esta razón por lo que resulta complicado investigar una serie de parámetros que se establezcan como baremo televisivo para, de este modo,  diferenciar lo que es telebasura de lo que no. Resulta muy complicado distinguirla pero, a pesar de ello, está muy introducida en la televisión y en la sociedad en general de una manera tan fuerte que incluso resulta complicado, en más de una ocasión, ser consciente de su existencia." ;
+  <zaguanVoc:creador>  "Remón Esteban, Ana Cristina" ;
+  <zaguanVoc:fecha>    "2013" ;
+  <zaguanVoc:tema>     "público" , "ética" , "audiencia" , "televisión contenidos " , "percepción" , "telebasura" , "moral" , "Graduado en Periodismo" , "valores" , "límites" ;
+  <zaguanVoc:titulo>   "La telebasura como el fenómeno televisivo imperante"
+] .
+
+[ a       owl:Ontology ] .
+
+zaguanVoc:Persona  a  owl:Class .
+
+zaguanVoc:idioma  a  owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   xsd:string , xsd:language .
+
+zaguanVoc:apellido  a  owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Persona ;
+        rdfs:range   xsd:string .
+
+zaguanVoc:Tesis  a       owl:Class ;
+        rdfs:subClassOf  zaguanVoc:Documento .
+
+zaguanVoc:Documento  a  owl:Class .
+
+zaguanVoc:contribuidor
+        a            owl:ObjectProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   zaguanVoc:Persona .
+
+zaguanVoc:editor  a  owl:ObjectProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   zaguanVoc:Editor .
+
+zaguanVoc:fecha  a   owl:DatatypeProperty ;
+        rdfs:domain  zaguanVoc:Documento ;
+        rdfs:range   xsd:date .
+
+xsd:date  a     rdfs:Datatype .
+
+zaguanVoc:Población  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:CSocialies ;
+        rdfs:prefLabel  "Población" .
+
+zaguanVoc:Religión  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Religión" .
+
+zaguanVoc:Química  a    skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Química" .
+
+zaguanVoc:Arte  a       skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Arte" .
+
+zaguanVoc:Cultura  a    skos:Concept ;
+        rdfs:narrower   zaguanVoc:Ocio , zaguanVoc:Arte , zaguanVoc:Literatura , zaguanVoc:Lengua , zaguanVoc:Historia , zaguanVoc:Religión , zaguanVoc:Filosofía ;
+        rdfs:prefLabel  "Cultura" .
+
+zaguanVoc:Trabajo  a    skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Trabajo" .
+
+zaguanVoc:Enseñanza  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:Educación ;
+        rdfs:prefLabel  "Enseñanza y formación" .
+
+zaguanVoc:Jurísdicción
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Juicio" .
+
+zaguanVoc:SistemasNiveles
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:Educación ;
+        rdfs:prefLabel  "Sistemas y niveles de enseñanza" .
+
+zaguanVoc:Educación  a  skos:Concept ;
+        rdfs:narrower   zaguanVoc:Evaluación , zaguanVoc:Enseñanza , zaguanVoc:Establecimientos , zaguanVoc:SistemasNiveles ;
+        rdfs:prefLabel  "Educación" .
+
+zaguanVoc:Física  a     skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Físicas" .
+
+zaguanVoc:Economía  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Economía" .
+
+zaguanVoc:Derechos  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Derechos humanos" .
+
+zaguanVoc:Literatura  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Literatura" .
+
+zaguanVoc:Evaluación  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:Educación ;
+        rdfs:prefLabel  "Evaluación de la educación" .
+
+zaguanVoc:Filosofía  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Filosofía" .
+
+zaguanVoc:CyT  a        skos:Concept ;
+        rdfs:narrower   zaguanVoc:Física , zaguanVoc:Medicina , zaguanVoc:Matemáticas , zaguanVoc:Biología , zaguanVoc:Geografía , zaguanVoc:Informática , zaguanVoc:Estadística , zaguanVoc:Química ;
+        rdfs:prefLabel  "Ciencia y tecnología" .
+
+zaguanVoc:Finanzas  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Finanzas" .
+
+zaguanVoc:Internacionalidad
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Relaciones internacionales" .
+
+zaguanVoc:Industria  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Industria" .
+
+zaguanVoc:Matemáticas
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Matemáticas" .
+
+zaguanVoc:Estadística
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Estadística" .
+
+zaguanVoc:Etnia  a      skos:Concept ;
+        rdfs:broader    zaguanVoc:CSocialies ;
+        rdfs:prefLabel  "Etnia" .
+
+zaguanVoc:Geografía  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Geografía" .
+
+zaguanVoc:Establecimientos
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:Educación ;
+        rdfs:prefLabel  "Establecimientos de enseñanza" .
+
+zaguanVoc:Historia  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Historia" .
+
+zaguanVoc:Política  a   skos:Concept ;
+        rdfs:narrower   zaguanVoc:Jurísdicción , zaguanVoc:Internacionalidad , zaguanVoc:Gobierno , zaguanVoc:Trabajo , zaguanVoc:Finanzas , zaguanVoc:Economía , zaguanVoc:Derechos , zaguanVoc:Industria ;
+        rdfs:prefLabel  "Política" .
+
+zaguanVoc:Informática
+        a               skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Informática" .
+
+zaguanVoc:Ocio  a       skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Ocio" .
+
+zaguanVoc:Biología  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Biología" .
+
+zaguanVoc:CSocialies  a  skos:Concept ;
+        rdfs:narrower   zaguanVoc:Familia , zaguanVoc:Población , zaguanVoc:Etnia , zaguanVoc:Psicología ;
+        rdfs:prefLabel  "Ciencias Sociales" .
+
+zaguanVoc:Lengua  a     skos:Concept ;
+        rdfs:broader    zaguanVoc:Cultura ;
+        rdfs:prefLabel  "Lengua" .
+
+zaguanVoc:Psicología  a  skos:Concept ;
+        rdfs:broader    zaguanVoc:CSocialies ;
+        rdfs:prefLabel  "Psicología" .
+
+zaguanVoc:Familia  a    skos:Concept ;
+        rdfs:broader    zaguanVoc:CSocialies ;
+        rdfs:prefLabel  "Familia" .
+
+zaguanVoc:Medicina  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:CyT ;
+        rdfs:prefLabel  "Medicina" .
+
+zaguanVoc:Gobierno  a   skos:Concept ;
+        rdfs:broader    zaguanVoc:Política ;
+        rdfs:prefLabel  "Gobierno" .
