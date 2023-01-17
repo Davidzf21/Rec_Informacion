@@ -8,7 +8,10 @@ import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import openllet.jena.PelletReasonerFactory;
@@ -73,9 +76,9 @@ public class SemanticGenerator {
     mapaPropiedades.put("title", modelo.getProperty("zaguanVoc:titulo"));
     mapaPropiedades.put("creator", modelo.getProperty("zaguanVoc:creador"));
     mapaPropiedades.put("subject", modelo.getProperty("zaguanVoc:tema"));
-    mapaPropiedades.put("description", modelo.getProperty("zaguanVoc:"));
-    mapaPropiedades.put("publisher", modelo.getProperty("zaguanVoc:"));
-    mapaPropiedades.put("contributor", modelo.getProperty("zaguanVoc:"));
+    //mapaPropiedades.put("description", modelo.getProperty("zaguanVoc:"));
+    mapaPropiedades.put("publisher", modelo.getProperty("zaguanVoc:editor"));
+    mapaPropiedades.put("contributor", modelo.getProperty("zaguanVoc:contribuidor"));
     mapaPropiedades.put("date", modelo.getProperty("zaguanVoc:fecha"));
 
     // Creamos un modelo de inferencia OWL2
@@ -92,11 +95,11 @@ public class SemanticGenerator {
         String[] files = file.list();
         if (files != null) {
           for (int i = 0; i < files.length; i++) {
-            return cargarDocumentos(modelo, propiedades, new File(file, files[i]));
+            cargarDocumentos(modelo, propiedades, new File(file, files[i]));
           }
         }
       } else {
-        Resource documento = modelo.createResource();
+        Resource documento = modelo.createResource("http://www.practicaZaguan.com/zaguan/" + file.getName());
         // Ruta del fichero file.getPath();
         // Ultima modificación file.lastModified();
 
@@ -108,7 +111,7 @@ public class SemanticGenerator {
                 "dc:title",
                 "dc:creator",
                 "dc:subject",
-                "dc:description",
+                //"dc:description",
                 "dc:publisher",
                 "dc:contributor"
         };
@@ -122,62 +125,6 @@ public class SemanticGenerator {
             documento.addProperty(propiedades.get(tipo.substring(3)), content);
           }
         }
-
-        /*
-        // Titulo
-        org.w3c.dom.NodeList listaNodosTitle = doc2.getElementsByTagName("dc:title");
-        Node nodoTitle = listaNodosTitle.item(0);
-        if(nodoTitle != null)
-        {
-          String content = nodoTitle.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-
-        // Creador
-        org.w3c.dom.NodeList listaNodosCreator = doc2.getElementsByTagName("dc:creator");
-        Node nodoCreator = listaNodosCreator.item(0);
-        if(nodoCreator != null)
-        {
-          String content = nodoCreator.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-
-        // Subject
-        org.w3c.dom.NodeList listaNodosSubject = doc2.getElementsByTagName("dc:subject");
-        Node nodoSubject = listaNodosSubject.item(0);
-        if(nodoSubject != null)
-        {
-          String content = nodoSubject.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-
-        // Description
-        org.w3c.dom.NodeList listaNodosDescription = doc2.getElementsByTagName("dc:description");
-        Node nodoDescription = listaNodosDescription.item(0);
-        if(nodoDescription != null)
-        {
-          String content = nodoDescription.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-
-        // Publisher
-        org.w3c.dom.NodeList listaNodosPublisher = doc2.getElementsByTagName("dc:publisher");
-        Node nodoPublisher = listaNodosPublisher.item(0);
-        if(nodoPublisher != null)
-        {
-          String content = nodoPublisher.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-
-        // Contributor
-        org.w3c.dom.NodeList listaNodosContributor = doc2.getElementsByTagName("dc:contributor");
-        Node nodoContributor = listaNodosContributor.item(0);
-        if(nodoContributor != null)
-        {
-          String content = nodoContributor.getTextContent();
-          //doc.add(new StringField("date", contentDate, Field.Store.YES));
-        }
-        */
 
         // Fecha
         org.w3c.dom.NodeList listaNodosDate = doc2.getElementsByTagName("dc:date");
