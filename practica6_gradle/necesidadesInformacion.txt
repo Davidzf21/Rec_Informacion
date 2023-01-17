@@ -1,0 +1,1 @@
+105-5 SELECT ?nombreDoc WHERE {?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"poro")}
