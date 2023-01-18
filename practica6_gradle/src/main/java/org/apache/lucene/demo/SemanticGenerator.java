@@ -238,7 +238,7 @@ public class SemanticGenerator {
           String content = nodo.getTextContent();
 
           if(tesauro.containsKey(content))
-            documento.addProperty(propiedades.get("subject"), "<" + tesauro.get(content) + ">");
+            documento.addProperty(propiedades.get("subject"), tesauro.get(content));
         }
 
         // Fecha
