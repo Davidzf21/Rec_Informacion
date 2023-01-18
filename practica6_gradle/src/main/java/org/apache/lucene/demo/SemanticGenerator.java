@@ -1,25 +1,20 @@
 package org.apache.lucene.demo;
-import com.github.jsonldjava.utils.Obj;
-import jdk.jshell.spi.ExecutionControl;
-import org.apache.commons.io.FileUtils;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import org.apache.jena.base.Sys;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.ReadWrite;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 
-import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
-import openllet.jena.PelletReasonerFactory;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.XSD;
 import org.w3c.dom.Node;
 
-import javax.swing.*;
+import javax.swing.plaf.nimbus.State;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -85,47 +80,62 @@ public class SemanticGenerator {
     mapaPropiedades.put("contributor", modelo.getProperty("zaguanVoc:contribuidor"));
     mapaPropiedades.put("date", modelo.getProperty("zaguanVoc:fecha"));
 
+    mapaPropiedades.put("idioma", modelo.getProperty("zaguanVoc:idioma"));
     mapaPropiedades.put("nombreEditor", modelo.getProperty("zaguanVoc:nombreEditor"));
     mapaPropiedades.put("nombrePerona", modelo.getProperty("zaguanVoc:nombrePerona"));
     mapaPropiedades.put("apellido", modelo.getProperty("zaguanVoc:apellido"));
 
-    mapaPropiedades.put("Persona", modelo.getProperty("zaguanVoc:Persona"));
+
+    HashMap<String, Resource> mapaRecursos = new HashMap<>();
+    mapaRecursos.put("tfg", modelo.getResource("zaguanVoc:TFG"));
+    mapaRecursos.put("tfm", modelo.getResource("zaguanVoc:TFM"));
+    mapaRecursos.put("tesis", modelo.getResource("zaguanVoc:TESIS"));
+
+    mapaRecursos.put("español", modelo.getResource("xsd:es"));
+    mapaRecursos.put("ingles", modelo.getResource("xsd:en"));
+    mapaRecursos.put("italiano", modelo.getResource("xsd:it"));
+    mapaRecursos.put("aleman", modelo.getResource("xsd:de"));
+    mapaRecursos.put("frances", modelo.getResource("xsd:fr"));
 
 
-    ArrayList<RDFNode> tesauro = new ArrayList<>();
+    HashMap<String, Resource> mapaTesauro = new HashMap<>();
     NodeIterator it = skos.listObjects();
     while(it.hasNext())
     {
-      RDFNode no = it.next();
-      if(!no.toString().startsWith("http"))
+      RDFNode nodo = it.next();
+      if(nodo instanceof Resource)
       {
-        tesauro.add(no);
+        Resource entrada = (Resource) nodo;
+        StmtIterator iter = entrada.listProperties();
+
+        while (iter.hasNext())
+        {
+          Statement st = iter.next();
+        }
+
+        mapaTesauro.put(entrada.getLocalName(), entrada);
       }
     }
 
-    // Creamos un modelo de inferencia OWL2
-    // InfModel inf = ModelFactory.createInfModel(PelletReasonerFactory.theInstance().create(), modelo);
-
     // Añadimos las instancias al modelo
     Model coleccion = ModelFactory.createDefaultModel();
-    Model modeloFinal = cargarDocumentos(coleccion, tesauro, mapaPropiedades, new File(docsPath));
+    Model modeloFinal = cargarDocumentos(coleccion, mapaRecursos, mapaPropiedades, new File(docsPath));
     union = ModelFactory.createUnion(union, modeloFinal);
-
 
     union.write(new FileOutputStream(new File("librosColeccionInf.ttl")),"TURTLE");
   }
 
-  static Model cargarDocumentos(Model modelo, ArrayList<RDFNode> tesauro, HashMap<String, Property> propiedades, File file) throws Exception {
+  static Model cargarDocumentos(Model modelo, HashMap<String, Resource> recursos, HashMap<String, Property> propiedades, File file) throws Exception {
     if (file.canRead()) {
       if (file.isDirectory()) {
         String[] files = file.list();
         if (files != null) {
           for (int i = 0; i < files.length; i++) {
-            cargarDocumentos(modelo, tesauro, propiedades, new File(file, files[i]));
+            cargarDocumentos(modelo, recursos, propiedades, new File(file, files[i]));
           }
         }
       } else {
-        Resource documento = modelo.createResource("http://www.practicaZaguan.com/zaguan/" + file.getName());
+        Resource documento = modelo.createResource("http://zaguan.unizar.es/record/" + file.getName());
 
         // Creamos el parser
         DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -148,11 +158,39 @@ public class SemanticGenerator {
           }
         }
 
+        // Idioma
+        org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName("dc:language");
+        for (int i =0; i<listaNodos.getLength(); i++){
+          Node nodo = listaNodos.item(i);
+          String content = nodo.getTextContent();
+
+          if(content == null)
+            continue;
+
+          String idioma;
+
+          if(content.equals("spa")){
+            idioma = "español";
+          }else if(content.equals("eng") || content.equals("en")){
+            idioma = "ingles";
+          }else if(content.equals("fre")){
+            idioma = "frances";
+          }else if(content.equals("ita")){
+            idioma = "italiano";
+          }else if(content.equals("ger")){
+            idioma = "aleman";
+          }else {
+            continue;
+          }
+          documento.addProperty(propiedades.get("idioma"), recursos.get(idioma));
+        }
+
         String[] personas = new String[]{
                 "dc:creator",
                 "dc:contributor"
         };
 
+        // Creador y Contribuidor
         for(String persona : personas) {
           org.w3c.dom.NodeList nodosPersona = doc2.getElementsByTagName(persona);
           for (int i = 0; i < nodosPersona.getLength(); i++) {
@@ -175,6 +213,7 @@ public class SemanticGenerator {
           }
         }
 
+        // Publisher
         org.w3c.dom.NodeList nodosPublisher = doc2.getElementsByTagName("dc:publisher");
         for (int i =0; i<nodosPublisher.getLength(); i++){
           Node nodo = nodosPublisher.item(i);
@@ -188,23 +227,24 @@ public class SemanticGenerator {
             );
         }
 
-        org.w3c.dom.NodeList listaNodos = doc2.getElementsByTagName("dc:subject");
-        for (int i =0; i<listaNodos.getLength(); i++){
-          Node nodo = listaNodos.item(i);
+        // Tesauro
+        org.w3c.dom.NodeList nodosTemas = doc2.getElementsByTagName("dc:subject");
+        for (int i =0; i<nodosTemas.getLength(); i++){
+          Node nodo = nodosTemas.item(i);
           String content = nodo.getTextContent();
 
-          RDFNode match = null;
-          for(RDFNode tipo : tesauro)
-          {
-            if(tipo.toString().equals(content))
-            {
-              match = tipo;
-              break;
-            }
-          }
+          //RDFNode match = null;
+          //for(RDFNode tipo : tesauro)
+          //{
+          //  if(tipo.toString().equals(content))
+          //  {
+          //    match = tipo;
+          //    break;
+          //  }
+          //}
 
-          if(match != null)
-            documento.addProperty(propiedades.get("subject"), match);
+          //if(match != null)
+            documento.addProperty(propiedades.get("subject"), content);
         }
 
         // Fecha
@@ -221,23 +261,23 @@ public class SemanticGenerator {
         Node nodoTipo = listaNodosTipo.item(0);
         if(nodoTipo != null)
         {
-          String contentTipo = nodoTipo.getTextContent();
+          String contentTipo = nodoTipo.getTextContent().toLowerCase().trim();
           String tipo = "";
 
-          if(contentTipo.equals("TAZ-TFG")){
+          if(contentTipo.equals("taz-tfg")){
             tipo = "tfg";
           }
-          else if(contentTipo.equals("TAZ-TFM")){
+          else if(contentTipo.equals("taz-tfm")){
             tipo = "tfm";
           }
-          else if(contentTipo.equals("TAZ-PFC")){
+          else if(contentTipo.equals("taz-pfc")){
             tipo = "tfg";
           }
-          else if(contentTipo.equals("TESIS")){
+          else if(contentTipo.equals("tesis")){
             tipo = "tesis";
           }
 
-          documento.addProperty(RDF.type, "zaguanVoc:<" + tipo + ">");
+          documento.addProperty(RDF.type, recursos.get(tipo));
         }
       }
     }
