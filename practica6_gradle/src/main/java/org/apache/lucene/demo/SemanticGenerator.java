@@ -1,7 +1,9 @@
 package org.apache.lucene.demo;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import opennlp.tools.parser.Cons;
 import org.apache.jena.base.Sys;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.*;
 
 import org.apache.jena.util.FileManager;
@@ -111,27 +113,29 @@ public class SemanticGenerator {
         while (iter.hasNext())
         {
           Statement st = iter.next();
-        }
+          Triple trip = st.asTriple();
 
-        mapaTesauro.put(entrada.getLocalName(), entrada);
+          if(trip.predicateMatches(skos.getProperty("http://www.w3.org/2000/01/rdf-schema#prefLabel").asNode()))
+            mapaTesauro.put(trip.getObject().toString(), entrada);
+        }
       }
     }
 
     // Añadimos las instancias al modelo
     Model coleccion = ModelFactory.createDefaultModel();
-    Model modeloFinal = cargarDocumentos(coleccion, mapaRecursos, mapaPropiedades, new File(docsPath));
+    Model modeloFinal = cargarDocumentos(coleccion, mapaRecursos, mapaPropiedades, mapaTesauro, new File(docsPath));
     union = ModelFactory.createUnion(union, modeloFinal);
 
     union.write(new FileOutputStream(new File("librosColeccionInf.ttl")),"TURTLE");
   }
 
-  static Model cargarDocumentos(Model modelo, HashMap<String, Resource> recursos, HashMap<String, Property> propiedades, File file) throws Exception {
+  static Model cargarDocumentos(Model modelo, HashMap<String, Resource> recursos, HashMap<String, Property> propiedades, HashMap<String, Resource> tesauro, File file) throws Exception {
     if (file.canRead()) {
       if (file.isDirectory()) {
         String[] files = file.list();
         if (files != null) {
           for (int i = 0; i < files.length; i++) {
-            cargarDocumentos(modelo, recursos, propiedades, new File(file, files[i]));
+            cargarDocumentos(modelo, recursos, propiedades, tesauro, new File(file, files[i]));
           }
         }
       } else {
@@ -233,18 +237,8 @@ public class SemanticGenerator {
           Node nodo = nodosTemas.item(i);
           String content = nodo.getTextContent();
 
-          //RDFNode match = null;
-          //for(RDFNode tipo : tesauro)
-          //{
-          //  if(tipo.toString().equals(content))
-          //  {
-          //    match = tipo;
-          //    break;
-          //  }
-          //}
-
-          //if(match != null)
-            documento.addProperty(propiedades.get("subject"), content);
+          if(tesauro.containsKey(content))
+            documento.addProperty(propiedades.get("subject"), "<" + tesauro.get(content) + ">");
         }
 
         // Fecha
