@@ -77,7 +77,7 @@ public class SemanticGenerator {
     mapaPropiedades.put("title", modelo.getProperty("zaguanVoc:titulo"));
     mapaPropiedades.put("creator", modelo.getProperty("zaguanVoc:creador"));
     mapaPropiedades.put("subject", modelo.getProperty("zaguanVoc:tema"));
-    //mapaPropiedades.put("description", modelo.getProperty("zaguanVoc:"));
+    mapaPropiedades.put("description", modelo.getProperty("zaguanVoc:descripcion"));
     mapaPropiedades.put("publisher", modelo.getProperty("zaguanVoc:editor"));
     mapaPropiedades.put("contributor", modelo.getProperty("zaguanVoc:contribuidor"));
     mapaPropiedades.put("date", modelo.getProperty("zaguanVoc:fecha"));
@@ -86,7 +86,6 @@ public class SemanticGenerator {
     mapaPropiedades.put("nombreEditor", modelo.getProperty("zaguanVoc:nombreEditor"));
     mapaPropiedades.put("nombrePerona", modelo.getProperty("zaguanVoc:nombrePerona"));
     mapaPropiedades.put("apellido", modelo.getProperty("zaguanVoc:apellido"));
-
 
     HashMap<String, Resource> mapaRecursos = new HashMap<>();
     mapaRecursos.put("tfg", modelo.getResource("zaguanVoc:TFG"));
@@ -98,7 +97,6 @@ public class SemanticGenerator {
     mapaRecursos.put("italiano", modelo.getResource("xsd:it"));
     mapaRecursos.put("aleman", modelo.getResource("xsd:de"));
     mapaRecursos.put("frances", modelo.getResource("xsd:fr"));
-
 
     HashMap<String, Resource> mapaTesauro = new HashMap<>();
     NodeIterator it = skos.listObjects();
@@ -116,7 +114,7 @@ public class SemanticGenerator {
           Triple trip = st.asTriple();
 
           if(trip.predicateMatches(skos.getProperty("http://www.w3.org/2000/01/rdf-schema#prefLabel").asNode()))
-            mapaTesauro.put(trip.getObject().toString(), entrada);
+            mapaTesauro.put(trip.getObject().toString().replace("\"", "").toLowerCase(), entrada);
         }
       }
     }
@@ -126,7 +124,7 @@ public class SemanticGenerator {
     Model modeloFinal = cargarDocumentos(coleccion, mapaRecursos, mapaPropiedades, mapaTesauro, new File(docsPath));
     union = ModelFactory.createUnion(union, modeloFinal);
 
-    union.write(new FileOutputStream(new File("librosColeccionInf.ttl")),"TURTLE");
+    union.write(new FileOutputStream("zaguanColeccion.ttl"),"TURTLE");
   }
 
   static Model cargarDocumentos(Model modelo, HashMap<String, Resource> recursos, HashMap<String, Property> propiedades, HashMap<String, Resource> tesauro, File file) throws Exception {
@@ -149,7 +147,7 @@ public class SemanticGenerator {
                 "dc:title",
                 "dc:identifier",
                 "dc:relation",
-                //"dc:description"
+                "dc:description"
         };
 
         // Tipos
@@ -235,7 +233,7 @@ public class SemanticGenerator {
         org.w3c.dom.NodeList nodosTemas = doc2.getElementsByTagName("dc:subject");
         for (int i =0; i<nodosTemas.getLength(); i++){
           Node nodo = nodosTemas.item(i);
-          String content = nodo.getTextContent();
+          String content = nodo.getTextContent().toLowerCase();
 
           if(tesauro.containsKey(content))
             documento.addProperty(propiedades.get("subject"), tesauro.get(content));
