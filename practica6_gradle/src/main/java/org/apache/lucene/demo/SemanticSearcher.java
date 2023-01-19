@@ -55,7 +55,9 @@ public class SemanticSearcher {
           for ( ; results.hasNext() ; ) {
             QuerySolution soln = results.nextSolution();
             Resource nombreDoc = soln.getResource("nombreDoc");
+            //RDFNode z = soln.get("y");
             String[] splitResults = nombreDoc.getURI().split("/");
+            //System.out.println(nombreDoc + " -> " + z.toString());
             out.write(id+"\t"+splitResults[splitResults.length - 1]+"\n");
           }
         } finally { qexec.close() ; }

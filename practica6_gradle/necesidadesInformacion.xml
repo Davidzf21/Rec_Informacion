@@ -20,3 +20,11 @@
         <text>Busco Trabajos de Fin de Grado de los últimos 10 años en español. Deben ser del campo de la informática (Computer Science) realizados o dirigidos por alguien llamado Javier.</text>
     </informationNeed>
 </informationNeeds>
+
+
+
+105-5 SELECT ?nombreDoc WHERE {?nombreDoc <zaguanVoc:titulo> ?z . { FILTER contains(?z,"caciquismo")} UNION {?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"dictadura")} UNION {?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"represión política")}}
+106-4 SELECT ?nombreDoc WHERE {?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"enfermedades neurodegenerativas")}
+107-2 SELECT ?nombreDoc WHERE {?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"crisis de 2008")}
+109-2 SELECT ?nombreDoc WHERE {{?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"Bioinformatics")} . ?nombreDoc <zaguanVoc:fecha> ?a . FILTER ( ?a > '2010' ) . ?nombreDoc <zaguanVoc:fecha> ?a . FILTER ( ?a < '2018' )}
+208-1 SELECT DISTINCT ?nombreDoc ?y WHERE {{{ ?nombreDoc <zaguanVoc:contribuidor> ?z . ?z <zaguanVoc:nombrePerona> ?y . FILTER contains(?y,"Javier")} UNION { ?nombreDoc <zaguanVoc:creador> ?z . ?z <zaguanVoc:nombrePerona> ?y . FILTER contains(?y,"Javier")}} . ?nombreDoc <zaguanVoc:editor> ?a . ?a <zaguanVoc:nombreEditor> ?b . FILTER contains(?b,"Inform") . ?nombreDoc <zaguanVoc:fecha> ?c . FILTER ( ?c > '2013' ) . ?nombreDoc a <zaguanVoc:TFG> . ?nombreDoc <zaguanVoc:idioma> <xsd:es> }
