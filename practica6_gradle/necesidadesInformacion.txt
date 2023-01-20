@@ -1,1 +1,1 @@
-109-2 SELECT ?nombreDoc WHERE {{?nombreDoc <zaguanVoc:titulo> ?z . FILTER contains(?z,"Bioinformatics")} . ?nombreDoc <zaguanVoc:fecha> ?a . FILTER ( ?a > '2010' ) . FILTER ( ?a < '2018' )}
+151 prefix text: <http://jena.apache.org/text#query> SELECT ?nombreDoc WHERE { ?nombreDoc text:query (<zaguanVoc:contribuidor> 'Javierre') }

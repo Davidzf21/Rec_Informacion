@@ -1,5 +1,6 @@
 package org.apache.lucene.demo;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import openllet.jena.PelletReasonerFactory;
 import opennlp.tools.parser.Cons;
 import org.apache.jena.base.Sys;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
@@ -72,31 +73,32 @@ public class SemanticGenerator {
     Model union = ModelFactory.createUnion(modelo, skos);
 
     HashMap<String, Property> mapaPropiedades = new HashMap<>();
-    mapaPropiedades.put("identifier", modelo.getProperty("zaguanVoc:identificador"));
-    mapaPropiedades.put("relation", modelo.getProperty("zaguanVoc:relacion"));
-    mapaPropiedades.put("title", modelo.getProperty("zaguanVoc:titulo"));
-    mapaPropiedades.put("creator", modelo.getProperty("zaguanVoc:creador"));
-    mapaPropiedades.put("subject", modelo.getProperty("zaguanVoc:tema"));
-    mapaPropiedades.put("description", modelo.getProperty("zaguanVoc:descripcion"));
-    mapaPropiedades.put("publisher", modelo.getProperty("zaguanVoc:editor"));
-    mapaPropiedades.put("contributor", modelo.getProperty("zaguanVoc:contribuidor"));
-    mapaPropiedades.put("date", modelo.getProperty("zaguanVoc:fecha"));
+    mapaPropiedades.put("identifier", modelo.getProperty("http://www.practicaZaguan.com/zaguan#identificador"));
+    mapaPropiedades.put("relation", modelo.getProperty("http://www.practicaZaguan.com/zaguan#relacion"));
+    mapaPropiedades.put("title", modelo.getProperty("http://www.practicaZaguan.com/zaguan#titulo"));
+    mapaPropiedades.put("creator", modelo.getProperty("http://www.practicaZaguan.com/zaguan#creador"));
+    mapaPropiedades.put("subject", modelo.getProperty("http://www.practicaZaguan.com/zaguan#tema"));
+    mapaPropiedades.put("description", modelo.getProperty("http://www.practicaZaguan.com/zaguan#descripcion"));
+    mapaPropiedades.put("publisher", modelo.getProperty("http://www.practicaZaguan.com/zaguan#editor"));
+    mapaPropiedades.put("contributor", modelo.getProperty("http://www.practicaZaguan.com/zaguan#contribuidor"));
+    mapaPropiedades.put("date", modelo.getProperty("http://www.practicaZaguan.com/zaguan#fecha"));
 
-    mapaPropiedades.put("idioma", modelo.getProperty("zaguanVoc:idioma"));
-    mapaPropiedades.put("nombreEditor", modelo.getProperty("zaguanVoc:nombreEditor"));
-    mapaPropiedades.put("nombrePerona", modelo.getProperty("zaguanVoc:nombrePerona"));
-    mapaPropiedades.put("apellido", modelo.getProperty("zaguanVoc:apellido"));
+    mapaPropiedades.put("idioma", modelo.getProperty("http://www.practicaZaguan.com/zaguan#idioma"));
+    mapaPropiedades.put("nombreEditor", modelo.getProperty("http://www.practicaZaguan.com/zaguan#nombreEditor"));
+    mapaPropiedades.put("nombrePerona", modelo.getProperty("http://www.practicaZaguan.com/zaguan#nombrePerona"));
+    mapaPropiedades.put("apellido", modelo.getProperty("http://www.practicaZaguan.com/zaguan#apellidoPersona"));
 
     HashMap<String, Resource> mapaRecursos = new HashMap<>();
-    mapaRecursos.put("tfg", modelo.getResource("zaguanVoc:TFG"));
-    mapaRecursos.put("tfm", modelo.getResource("zaguanVoc:TFM"));
-    mapaRecursos.put("tesis", modelo.getResource("zaguanVoc:TESIS"));
+    mapaRecursos.put("tfg", modelo.getResource("http://www.practicaZaguan.com/zaguan#TFG"));
+    mapaRecursos.put("tfm", modelo.getResource("http://www.practicaZaguan.com/zaguan#TFM"));
+    mapaRecursos.put("tesis", modelo.getResource("http://www.practicaZaguan.com/zaguan#TESIS"));
 
-    mapaRecursos.put("español", modelo.getResource("xsd:es"));
-    mapaRecursos.put("ingles", modelo.getResource("xsd:en"));
-    mapaRecursos.put("italiano", modelo.getResource("xsd:it"));
-    mapaRecursos.put("aleman", modelo.getResource("xsd:de"));
-    mapaRecursos.put("frances", modelo.getResource("xsd:fr"));
+    mapaRecursos.put("español", modelo.getResource("http://www.w3.org/2001/XMLSchema#es"));
+    mapaRecursos.put("ingles", modelo.getResource("http://www.w3.org/2001/XMLSchema#en"));
+    mapaRecursos.put("italiano", modelo.getResource("http://www.w3.org/2001/XMLSchema#it"));
+    mapaRecursos.put("aleman", modelo.getResource("http://www.w3.org/2001/XMLSchema#de"));
+    mapaRecursos.put("frances", modelo.getResource("http://www.w3.org/2001/XMLSchema#fr"));
+    mapaRecursos.put("portugues", modelo.getResource("http://www.w3.org/2001/XMLSchema#fr"));
 
     HashMap<String, Resource> mapaTesauro = new HashMap<>();
     NodeIterator it = skos.listObjects();
@@ -113,7 +115,7 @@ public class SemanticGenerator {
           Statement st = iter.next();
           Triple trip = st.asTriple();
 
-          if(trip.predicateMatches(skos.getProperty("http://www.w3.org/2000/01/rdf-schema#prefLabel").asNode()))
+          if(trip.predicateMatches(skos.getProperty("http://www.w3.org/2004/02/skos/core#prefLabel").asNode()))
             mapaTesauro.put(trip.getObject().toString().replace("\"", "").toLowerCase(), entrada);
         }
       }
@@ -124,7 +126,14 @@ public class SemanticGenerator {
     Model modeloFinal = cargarDocumentos(coleccion, mapaRecursos, mapaPropiedades, mapaTesauro, new File(docsPath));
     union = ModelFactory.createUnion(union, modeloFinal);
 
+
     union.write(new FileOutputStream("zaguanColeccion.ttl"),"TURTLE");
+
+    //union = ModelFactory.createUnion(union, FileManager.get().loadModel("./skosModelo.ttl","TURTLE"));
+
+    //InfModel inf = ModelFactory.createInfModel(PelletReasonerFactory.theInstance().create(), union);
+    //inf.write(new FileOutputStream("zaguanColeccionInf.ttl"),"TURTLE");
+
   }
 
   static Model cargarDocumentos(Model modelo, HashMap<String, Resource> recursos, HashMap<String, Property> propiedades, HashMap<String, Resource> tesauro, File file) throws Exception {
@@ -181,6 +190,8 @@ public class SemanticGenerator {
             idioma = "italiano";
           }else if(content.equals("ger")){
             idioma = "aleman";
+          }else if(content.equals("por")){
+            idioma = "portugues";
           }else {
             continue;
           }

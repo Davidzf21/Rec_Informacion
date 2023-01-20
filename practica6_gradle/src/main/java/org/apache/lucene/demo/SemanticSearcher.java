@@ -29,8 +29,8 @@ public class SemanticSearcher {
   public static void ExeInfoNeeds(String rdf, String infoNeedsFile, BufferedWriter out) throws Exception
   {
     // cargamos el fichero deseado
-    Model model = FileManager.get().loadModel(rdf);
-
+    //Model model = FileManager.get().loadModel(rdf);
+    Dataset ds = RDFDataMgr.loadDataset(rdf);
     // Leemos el fichero de necesidades de información
     BufferedReader br = null;
     try {
@@ -49,15 +49,16 @@ public class SemanticSearcher {
         }
         //ejecutamos la consulta y obtenemos los resultados
         Query query = QueryFactory.create(queryString) ;
-        QueryExecution qexec = QueryExecutionFactory.create(query, model) ;
+        QueryExecution qexec = QueryExecutionFactory.create(query, ds) ;
         try {
           ResultSet results = qexec.execSelect() ;
           for ( ; results.hasNext() ; ) {
             QuerySolution soln = results.nextSolution();
             Resource nombreDoc = soln.getResource("nombreDoc");
-            //RDFNode z = soln.get("y");
+            if(nombreDoc == null)
+              continue;
+
             String[] splitResults = nombreDoc.getURI().split("/");
-            //System.out.println(nombreDoc + " -> " + z.toString());
             out.write(id+"\t"+splitResults[splitResults.length - 1]+"\n");
           }
         } finally { qexec.close() ; }
